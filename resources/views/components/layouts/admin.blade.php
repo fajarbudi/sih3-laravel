@@ -10,15 +10,7 @@
 </head>
 {{-- Tata letak ala Linear: sidebar dan latar abu-abu yang sama, konten di panel putih bergaris tipis. --}}
 <body class="min-h-screen bg-gray-100 font-sans text-sm text-gray-900 antialiased">
-    @php
-        // Menu sidebar: [grup => [[label, route, ikon], ...]]. Tambahkan modul baru di sini.
-        $menu = [
-            '' => [
-                ['Dashboard', 'admin.dashboard', 'M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25'],
-            ],
-        ];
-        $pengguna = auth()->user();
-    @endphp
+    @php $pengguna = auth()->user(); @endphp
 
     <div id="latar-sidebar" class="fixed inset-0 z-30 hidden bg-gray-950/40 lg:hidden" onclick="tutupSidebar()"></div>
 
@@ -27,28 +19,7 @@
         <a href="{{ route('admin.dashboard') }}" class="mx-3 mt-3 flex h-12 shrink-0 items-center rounded-md px-2 hover:bg-gray-200/60">
             <img src="{{ asset('images/logo-header-admin.png') }}" alt="Portal SIH3 Wilayah Sungai Serayu Opak" width="256" height="73" class="h-8 w-auto">
         </a>
-        <nav class="flex-1 overflow-y-auto px-3 py-3" aria-label="Menu utama">
-            @foreach ($menu as $grup => $item)
-                @if ($grup)
-                    <p class="mb-1 mt-5 px-2 text-xs font-medium text-gray-600">{{ $grup }}</p>
-                @endif
-                <ul class="space-y-0.5">
-                    @foreach ($item as [$label, $route, $ikon])
-                        @php $aktif = request()->routeIs($route.'*'); @endphp
-                        <li>
-                            <a href="{{ route($route) }}" @if ($aktif) aria-current="page" @endif @class([
-                                'flex min-h-11 items-center gap-2.5 rounded-md px-2 font-medium lg:min-h-8',
-                                'bg-white text-gray-900 ring-1 ring-gray-200' => $aktif,
-                                'text-gray-600 hover:bg-gray-200/60 hover:text-gray-900 active:bg-gray-200' => ! $aktif,
-                            ])>
-                                <svg class="size-4 shrink-0 {{ $aktif ? 'text-primary-600' : 'text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ikon }}"/></svg>
-                                {{ $label }}
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            @endforeach
-        </nav>
+        <x-admin.sidebar-menu />
 
         {{-- Pengguna di bawah sidebar, seperti Linear --}}
         <div class="flex items-center gap-2.5 border-t border-gray-200 px-5 py-3">
@@ -72,15 +43,15 @@
             <header class="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-4 lg:rounded-t-lg lg:px-6">
                 <button type="button" id="tombol-menu" class="-ml-2 flex size-11 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 active:bg-gray-200 lg:hidden"
                     onclick="bukaSidebar()" aria-label="Buka menu" aria-controls="sidebar" aria-expanded="false">
-                    <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                    <i class="bi bi-list text-xl leading-none" aria-hidden="true"></i>
                 </button>
-                <h1 class="font-medium">{{ $judul }}</h1>
+                <h1 class="shrink-0 font-medium">{{ $judul }}</h1>
                 @if ($keterangan)
-                    <p class="ml-auto truncate text-gray-500">{{ $keterangan }}</p>
+                    <p class="ml-auto min-w-0 truncate text-gray-500">{{ $keterangan }}</p>
                 @endif
             </header>
 
-            <main class="flex-1 px-4 py-6 lg:px-6">
+            <main class="min-w-0 flex-1 px-4 py-6 lg:px-6">
                 {{ $slot }}
             </main>
 

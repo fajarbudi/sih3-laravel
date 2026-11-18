@@ -6,6 +6,8 @@
 <link rel="icon" type="image/png" href="{{ asset('images/sih3-favicon.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+{{-- Ikon: Bootstrap Icons, pakai <i class="bi bi-nama" aria-hidden="true"></i> (daftar nama: icons.getbootstrap.com) --}}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
 <style type="text/tailwindcss">
     @theme {
