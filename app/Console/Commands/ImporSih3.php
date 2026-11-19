@@ -703,6 +703,7 @@ class ImporSih3 extends Command
                 'status' => strtolower($this->teks($r->download_status) ?? 'pengajuan'),
                 'keterangan' => $this->teks($r->download_keterangan),
                 'path_file' => $this->teks($r->download_file),
+                'token_unduh' => Str::random(32), // dipakai tautan unduh arsip di halaman detail
                 'created_at' => $this->waktu($r->download_waktu) ?? now(),
                 'updated_at' => $this->waktu($r->download_waktu) ?? now(),
             ]);

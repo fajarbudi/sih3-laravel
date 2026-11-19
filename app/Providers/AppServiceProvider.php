@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,5 +30,12 @@ class AppServiceProvider extends ServiceProvider
             'dokumen' => Models\Dokumen::class,
             'pengiriman_air' => Models\PengirimanAir::class,
         ]);
+
+        // Menu Pengaturan (pos, walidata, pengguna, perangkat, ambang batas, rumus debit): route memakai can:superadmin.
+        Gate::define('superadmin', fn (Models\Pengguna $pengguna) => $pengguna->isSuperadmin());
+
+        // Grup Ketersediaan data (Unduh Data, File Arsip, Ketersediaan): superadmin dan admin walidata, bukan petugas pos
+        // (sama dengan sidebar; petugas tidak boleh memverifikasi permintaan atau mengubah arsip lewat URL langsung).
+        Gate::define('admin', fn (Models\Pengguna $pengguna) => $pengguna->peran !== \App\Enums\PeranPengguna::PetugasPos);
     }
 }

@@ -113,13 +113,13 @@ it('dashboard admin walidata hanya melihat data pos walidatanya', function () {
         ->assertViewHas('hujanPerPos', fn ($h) => $h->all() === ['Pos PJT' => 4.0]);
 });
 
-it('menu sidebar superadmin berisi semua grup, modul yang belum dibuat berlabel Segera', function () {
+it('menu sidebar superadmin berisi semua grup dan semua modul sudah dibuat (tidak ada lagi "Segera")', function () {
     $this->actingAs(pengguna('superadmin'))->get('/admin')
         ->assertOk()
         ->assertSeeInOrder(['Dashboard', 'Halaman Depan', 'H3', 'Hidrologi', 'Hidrogeologi', 'Hidrometeorologi', 'Ketersediaan data', 'Unduh Data', 'Ketersediaan Data', 'Pengaturan', 'Publikasi', 'Catatan Kejadian', 'Ambang Batas', 'Input'])
         ->assertSee('href="'.route('admin.dashboard').'"', false)
-        ->assertSee('aria-disabled="true"', false)
-        ->assertSee('Segera');
+        ->assertDontSee('aria-disabled="true"', false)
+        ->assertDontSee('Segera');
 });
 
 it('menu sidebar admin walidata tanpa Publikasi, Input, dan menu pengaturan sistem', function () {
