@@ -18,11 +18,11 @@
     };
 @endphp
 
-<x-layouts.admin judul="Dashboard" :keterangan="'Diperbarui '.$sekarang->translatedFormat('j F Y, H:i').' WIB'">
+<x-layouts.admin judul="Halaman Depan" induk="Dashboard" :keterangan="'Diperbarui '.$sekarang->translatedFormat('j F Y, H:i').' WIB'">
     {{-- HUJAN: bagian utama --}}
     <section class="rounded-lg border border-gray-200">
-        <header class="flex items-baseline justify-between gap-4 border-b border-gray-200 px-5 py-3">
-            <h2 class="text-base font-semibold">Hujan</h2>
+        <header class="flex items-baseline justify-between gap-4 border-b border-gray-200 px-4 py-2.5">
+            <h2 class="font-medium">Hujan</h2>
             <p class="text-gray-500">24 jam terakhir</p>
         </header>
 
@@ -80,8 +80,8 @@
     <div class="mt-4 grid items-start gap-4 lg:grid-cols-3">
         {{-- MUKA AIR: tabel --}}
         <section class="min-w-0 rounded-lg border border-gray-200 lg:col-span-2">
-            <header class="flex items-baseline justify-between gap-4 border-b border-gray-200 px-5 py-3">
-                <h2 class="text-base font-semibold">Muka air</h2>
+            <header class="flex items-baseline justify-between gap-4 border-b border-gray-200 px-4 py-2.5">
+                <h2 class="font-medium">Muka air</h2>
                 <p class="text-gray-500">{{ $posNaik ? $posNaik.' pos naik dalam 24 jam' : 'Tidak ada pos yang naik dalam 24 jam' }}</p>
             </header>
             @if ($mukaAir->isEmpty())
@@ -136,8 +136,8 @@
         <div class="flex min-w-0 flex-col gap-4">
             {{-- CUACA --}}
             <section class="rounded-lg border border-gray-200">
-                <header class="flex items-baseline justify-between gap-4 border-b border-gray-200 px-5 py-3">
-                    <h2 class="text-base font-semibold">Cuaca</h2>
+                <header class="flex items-baseline justify-between gap-4 border-b border-gray-200 px-4 py-2.5">
+                    <h2 class="font-medium">Cuaca</h2>
                     <p class="text-gray-500">Bacaan terakhir</p>
                 </header>
                 @forelse ($cuaca as $c)
@@ -156,7 +156,7 @@
 
             {{-- PERMINTAAN DATA --}}
             <section class="flex items-center justify-between gap-4 rounded-lg border border-gray-200 px-5 py-4">
-                <h2 class="text-base font-semibold">Permintaan data</h2>
+                <h2 class="font-medium">Permintaan data</h2>
                 <p class="text-gray-600">{{ $jumlahMenunggu ? $angka($jumlahMenunggu).' menunggu persetujuan' : 'Tidak ada yang menunggu' }}</p>
             </section>
         </div>

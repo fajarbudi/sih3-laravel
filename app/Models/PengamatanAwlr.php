@@ -17,6 +17,9 @@ class PengamatanAwlr extends Model
             'waktu' => 'datetime',
             'tervalidasi' => 'boolean',
             'tma' => 'float',
+            'limpas' => 'float',
+            'intake_kiri' => 'float',
+            'intake_kanan' => 'float',
         ];
     }
 

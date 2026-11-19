@@ -7,12 +7,13 @@
 
 <li>
     <details class="group" @if (str_contains($slot, 'aria-current="page"')) open @endif>
-        <summary class="flex min-h-11 list-none items-center gap-2.5 rounded-md px-2 font-medium text-gray-700 hover:bg-gray-200/60 hover:text-gray-900 active:bg-gray-200 lg:min-h-8 [&::-webkit-details-marker]:hidden">
-            <i class="bi bi-{{ $ikon }} shrink-0 text-base leading-none text-gray-500" aria-hidden="true"></i>
-            <span class="flex-1">{{ $label }}</span>
-            <i class="bi bi-chevron-right inline-block shrink-0 text-xs leading-none text-gray-500 transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden="true"></i>
+        <summary class="flex min-h-11 list-none items-center gap-2 rounded-md px-2 font-medium text-gray-700 hover:bg-gray-200/60 hover:text-gray-900 active:bg-gray-200 lg:min-h-7 [&::-webkit-details-marker]:hidden">
+            <i class="bi bi-{{ $ikon }} flex w-4 shrink-0 justify-center text-sm leading-none text-gray-600" aria-hidden="true"></i>
+            <span class="flex-1 truncate">{{ $label }}</span>
+            <i class="bi bi-caret-right-fill inline-block shrink-0 text-[0.5rem] leading-none text-gray-500 transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden="true"></i>
         </summary>
-        <ul class="mb-1 ml-[1.0625rem] mt-0.5 space-y-0.5 border-l border-gray-200 pl-2">
+        {{-- Sub-menu menjorok tanpa garis pandu, seperti daftar tim di Linear --}}
+        <ul class="mt-px space-y-px pl-6">
             {{ $slot }}
         </ul>
     </details>

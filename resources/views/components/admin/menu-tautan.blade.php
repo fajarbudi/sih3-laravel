@@ -8,29 +8,28 @@
 
 @php
     $ada = Route::has($route);
-    $aktif = $ada && request()->routeIs($route.'*');
+    $aktif = $ada && request()->routeIs($route, $route.'.*');
 @endphp
 
 <li>
     @if ($ada)
         <a href="{{ route($route) }}" @if ($aktif) aria-current="page" @endif @class([
-            'flex min-h-11 items-center gap-2.5 rounded-md px-2 lg:min-h-8',
-            'bg-white font-medium text-gray-900 ring-1 ring-gray-200' => $aktif,
+            'flex min-h-11 items-center gap-2 rounded-md px-2 font-medium lg:min-h-7',
+            'bg-gray-200/80 text-gray-900' => $aktif,
             'text-gray-700 hover:bg-gray-200/60 hover:text-gray-900 active:bg-gray-200' => ! $aktif,
-            'font-medium' => $ikon && ! $aktif,
         ])>
             @if ($ikon)
-                <i @class(["bi bi-$ikon shrink-0 text-base leading-none", 'text-primary-600' => $aktif, 'text-gray-500' => ! $aktif]) aria-hidden="true"></i>
+                <i @class(["bi bi-$ikon flex w-4 shrink-0 justify-center text-sm leading-none", 'text-gray-900' => $aktif, 'text-gray-600' => ! $aktif]) aria-hidden="true"></i>
             @endif
-            {{ $slot }}
+            <span class="truncate">{{ $slot }}</span>
         </a>
     @else
-        <span @class(['flex min-h-11 cursor-not-allowed items-center gap-2.5 rounded-md px-2 text-gray-600 lg:min-h-8', 'font-medium' => $ikon]) aria-disabled="true">
+        <span class="flex min-h-11 cursor-not-allowed items-center gap-2 rounded-md px-2 font-medium text-gray-600 lg:min-h-7" aria-disabled="true">
             @if ($ikon)
-                <i class="bi bi-{{ $ikon }} shrink-0 text-base leading-none text-gray-400" aria-hidden="true"></i>
+                <i class="bi bi-{{ $ikon }} flex w-4 shrink-0 justify-center text-sm leading-none text-gray-400" aria-hidden="true"></i>
             @endif
             <span class="flex-1 truncate">{{ $slot }}</span>
-            <span class="shrink-0 text-xs text-gray-600">Segera</span>
+            <span class="shrink-0 rounded px-1 text-[0.6875rem] leading-4 text-gray-600 ring-1 ring-gray-300">Segera</span>
         </span>
     @endif
 </li>

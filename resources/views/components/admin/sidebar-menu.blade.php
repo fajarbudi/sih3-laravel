@@ -12,51 +12,51 @@
     $jenisPos = $pengguna->pos?->jenis?->value;
 @endphp
 
-<nav class="flex-1 overflow-y-auto px-3 pb-3" aria-label="Menu utama">
+<nav class="mt-2 flex-1 overflow-y-auto px-2 pb-3" aria-label="Menu utama">
     {{-- Dashboard --}}
-    <p id="menu-dashboard" class="mb-1 mt-4 px-2 text-xs font-medium text-gray-600">Dashboard</p>
-    <ul class="space-y-0.5" aria-labelledby="menu-dashboard">
+    <p id="menu-dashboard" class="mb-0.5 mt-5 px-2 text-xs font-medium text-gray-600">Dashboard</p>
+    <ul class="space-y-px" aria-labelledby="menu-dashboard">
         <x-admin.menu-tautan route="admin.dashboard" ikon="house">Halaman Depan</x-admin.menu-tautan>
     </ul>
 
     @if ($petugas)
         {{-- Petugas pos: hanya jenis data posnya sendiri --}}
         @if ($jenisPos === 'awlr')
-            <p id="menu-petugas" class="mb-1 mt-4 px-2 text-xs font-medium text-gray-600">Hidrologi</p>
-            <ul class="space-y-0.5" aria-labelledby="menu-petugas">
+            <p id="menu-petugas" class="mb-0.5 mt-5 px-2 text-xs font-medium text-gray-600">Hidrologi</p>
+            <ul class="space-y-px" aria-labelledby="menu-petugas">
                 <x-admin.menu-tautan route="admin.duga-air" ikon="droplet">Duga Air</x-admin.menu-tautan>
                 <x-admin.menu-tautan route="admin.debit" ikon="droplet">Debit</x-admin.menu-tautan>
                 <x-admin.menu-tautan route="admin.rekap.duga-air" ikon="table">Rekap Duga Air</x-admin.menu-tautan>
             </ul>
         @elseif ($jenisPos === 'kualitas_air')
-            <p id="menu-petugas" class="mb-1 mt-4 px-2 text-xs font-medium text-gray-600">Hidrologi</p>
-            <ul class="space-y-0.5" aria-labelledby="menu-petugas">
+            <p id="menu-petugas" class="mb-0.5 mt-5 px-2 text-xs font-medium text-gray-600">Hidrologi</p>
+            <ul class="space-y-px" aria-labelledby="menu-petugas">
                 <x-admin.menu-tautan route="admin.kualitas-air" ikon="droplet">Kualitas Air</x-admin.menu-tautan>
                 <x-admin.menu-tautan route="admin.rekap.kualitas-air" ikon="table">Rekap Kualitas Air</x-admin.menu-tautan>
             </ul>
         @elseif ($jenisPos === 'arr')
-            <p id="menu-petugas" class="mb-1 mt-4 px-2 text-xs font-medium text-gray-600">Hidrometeorologi</p>
-            <ul class="space-y-0.5" aria-labelledby="menu-petugas">
+            <p id="menu-petugas" class="mb-0.5 mt-5 px-2 text-xs font-medium text-gray-600">Hidrometeorologi</p>
+            <ul class="space-y-px" aria-labelledby="menu-petugas">
                 <x-admin.menu-tautan route="admin.curah-hujan" ikon="cloud-rain">Curah Hujan</x-admin.menu-tautan>
                 <x-admin.menu-tautan route="admin.rekap.curah-hujan" ikon="table">Rekap Curah Hujan</x-admin.menu-tautan>
             </ul>
         @elseif ($jenisPos === 'klimatologi')
-            <p id="menu-petugas" class="mb-1 mt-4 px-2 text-xs font-medium text-gray-600">Hidrometeorologi</p>
-            <ul class="space-y-0.5" aria-labelledby="menu-petugas">
+            <p id="menu-petugas" class="mb-0.5 mt-5 px-2 text-xs font-medium text-gray-600">Hidrometeorologi</p>
+            <ul class="space-y-px" aria-labelledby="menu-petugas">
                 <x-admin.menu-tautan route="admin.klimatologi" ikon="cloud-rain">Klimatologi</x-admin.menu-tautan>
                 <x-admin.menu-tautan route="admin.rekap.klimatologi" ikon="table">Rekap Klimatologi</x-admin.menu-tautan>
             </ul>
         @elseif ($jenisPos === 'mat' || $jenisPos === 'agwlr')
-            <p id="menu-petugas" class="mb-1 mt-4 px-2 text-xs font-medium text-gray-600">Hidrogeologi</p>
-            <ul class="space-y-0.5" aria-labelledby="menu-petugas">
+            <p id="menu-petugas" class="mb-0.5 mt-5 px-2 text-xs font-medium text-gray-600">Hidrogeologi</p>
+            <ul class="space-y-px" aria-labelledby="menu-petugas">
                 <x-admin.menu-tautan route="admin.muka-air-tanah" ikon="layers">Muka Air Tanah</x-admin.menu-tautan>
                 <x-admin.menu-tautan route="admin.rekap.muka-air-tanah" ikon="table">Rekap Muka Air Tanah</x-admin.menu-tautan>
             </ul>
         @endif
     @else
         {{-- H3 --}}
-        <p id="menu-h3" class="mb-1 mt-4 px-2 text-xs font-medium text-gray-600">H3</p>
-        <ul class="space-y-0.5" aria-labelledby="menu-h3">
+        <p id="menu-h3" class="mb-0.5 mt-5 px-2 text-xs font-medium text-gray-600">H3</p>
+        <ul class="space-y-px" aria-labelledby="menu-h3">
             <x-admin.menu-grup label="Hidrologi" ikon="droplet">
                 <x-admin.menu-tautan route="admin.duga-air">Duga Air</x-admin.menu-tautan>
                 <x-admin.menu-tautan route="admin.kualitas-air">Kualitas Air</x-admin.menu-tautan>
@@ -80,8 +80,8 @@
         </ul>
 
         {{-- Ketersediaan data --}}
-        <p id="menu-ketersediaan" class="mb-1 mt-4 px-2 text-xs font-medium text-gray-600">Ketersediaan data</p>
-        <ul class="space-y-0.5" aria-labelledby="menu-ketersediaan">
+        <p id="menu-ketersediaan" class="mb-0.5 mt-5 px-2 text-xs font-medium text-gray-600">Ketersediaan data</p>
+        <ul class="space-y-px" aria-labelledby="menu-ketersediaan">
             <x-admin.menu-grup label="Unduh Data" ikon="download">
                 <x-admin.menu-tautan route="admin.unduh.pengajuan">Pengajuan</x-admin.menu-tautan>
                 <x-admin.menu-tautan route="admin.unduh.verifikasi">Verifikasi</x-admin.menu-tautan>
@@ -97,8 +97,8 @@
     @endif
 
     {{-- Pengaturan --}}
-    <p id="menu-pengaturan" class="mb-1 mt-4 px-2 text-xs font-medium text-gray-600">Pengaturan</p>
-    <ul class="space-y-0.5" aria-labelledby="menu-pengaturan">
+    <p id="menu-pengaturan" class="mb-0.5 mt-5 px-2 text-xs font-medium text-gray-600">Pengaturan</p>
+    <ul class="space-y-px" aria-labelledby="menu-pengaturan">
         @if ($superadmin)
             <x-admin.menu-grup label="Publikasi" ikon="newspaper">
                 <x-admin.menu-tautan route="admin.galeri">Galeri Pos</x-admin.menu-tautan>

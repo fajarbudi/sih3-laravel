@@ -6,10 +6,12 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css'],
             refresh: true,
             fonts: [
-                bunny('Instrument Sans', {
+                // Inter diunduh saat build dan disajikan dari server sendiri (bukan Google Fonts),
+                // dimuat lewat direktif @fonts di <head>.
+                bunny('Inter', {
                     weights: [400, 500, 600],
                 }),
             ],

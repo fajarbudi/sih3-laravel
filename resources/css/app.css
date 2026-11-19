@@ -1,9 +1,49 @@
+/*
+ * Gaya panel admin SIH3, dibangun dengan Vite (npm run build / npm run dev).
+ * Sebelumnya Tailwind dimuat dari CDN sebagai <script> di <head> yang menahan render (antislop R-40).
+ * Gaya mengikuti Linear atas permintaan pemilik: Inter 13px, abu-abu netral, garis tipis. Warna utama biru logo.
+ */
 @import 'tailwindcss';
+/* Ikon: Bootstrap Icons dari npm (bukan CDN). Pakai <i class="bi bi-nama" aria-hidden="true"></i> */
+@import 'bootstrap-icons/font/bootstrap-icons.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* --font-inter disediakan direktif @fonts (laravel-vite-plugin/fonts) */
+    --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    --text-sm: 0.8125rem; /* 13px, ukuran teks utama Linear */
+    --text-sm--line-height: 1.25rem;
+    --text-xs: 0.75rem;
+    --text-xs--line-height: 1rem;
+
+    /* Abu-abu netral ala Linear. Teks di atas gray-100 minimal gray-600 (kontras AA). */
+    --color-gray-50: #fafafa;
+    --color-gray-100: #f4f4f5;
+    --color-gray-150: #ececee;
+    --color-gray-200: #e4e4e7;
+    --color-gray-300: #d4d4d8;
+    --color-gray-400: #a1a1aa;
+    --color-gray-450: #8e8e96; /* garis kolom isian: 3,25:1 di atas putih (kontras non-teks 3:1) */
+    --color-gray-500: #71717a;
+    --color-gray-600: #5b5b63;
+    --color-gray-700: #3f3f46;
+    --color-gray-800: #27272a;
+    --color-gray-900: #18181b;
+    --color-gray-950: #09090b;
+
+    --color-primary-50: #e8f1fc;
+    --color-primary-100: #cfe2f9;
+    --color-primary-500: #0b63ce;
+    --color-primary-600: #0a57b5;
+    --color-primary-700: #08489a;
+}
+
+@layer base {
+    html { font-feature-settings: 'cv11', 'ss01'; }
+    h1, h2, h3 { letter-spacing: -0.01em; }
+    button, [role="button"], summary, label[for], select { cursor: pointer; }
+    button:disabled { cursor: not-allowed; }
+    :focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 1px; border-radius: 0.375rem; }
 }
