@@ -31,8 +31,9 @@ class ParameterKualitasAirSeeder extends Seeder
         'so4' => ['Sulfat (SO4)', 'mg/L'],
         'fe' => ['Besi (Fe)', 'mg/L'],
         'cu' => ['Tembaga (Cu)', 'mg/L'],
-        'coli' => ['Fecal Coliform', 'MPN/100mL'],
-        'total_coli' => ['Total Coliform', 'MPN/100mL'],
+        // Aplikasi lama hanya memakai kolom coli dengan label "Total Coli"; kolom total_coli tidak pernah diisi (semua 0/kosong).
+        'coli' => ['Total Coliform', 'MPN/100mL'],
+        'total_coli' => ['Total Coliform (kolom lama tak terpakai)', 'MPN/100mL'],
         'tss' => ['TSS', 'mg/L'],
         'kesadahan' => ['Kesadahan', 'mg/L'],
         'ca' => ['Kalsium (Ca)', 'mg/L'],
@@ -60,6 +61,9 @@ class ParameterKualitasAirSeeder extends Seeder
         'deterjen' => ['Deterjen (MBAS)', 'mg/L'],
     ];
 
+    /** Tidak ditampilkan di form; nilainya yang sudah ada tetap disimpan. */
+    public const NONAKTIF = ['total_coli'];
+
     public function run(): void
     {
         $urutan = 0;
@@ -67,7 +71,7 @@ class ParameterKualitasAirSeeder extends Seeder
         foreach (self::PARAMETER as $kode => [$nama, $satuan]) {
             ParameterKualitasAir::updateOrCreate(
                 ['kode' => $kode],
-                ['nama' => $nama, 'satuan' => $satuan, 'urutan' => ++$urutan],
+                ['nama' => $nama, 'satuan' => $satuan, 'urutan' => ++$urutan, 'aktif' => ! in_array($kode, self::NONAKTIF)],
             );
         }
     }

@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\PengamatanAwlr;
-use App\Models\Pengguna;
 use App\Models\Pos;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -14,11 +13,6 @@ beforeEach(function () {
     Pos::forceCreate(['id' => 11, 'walidata_id' => 11, 'nama' => 'Bendung PJT', 'tipe' => 'hidrologi', 'jenis' => 'awlr', 'metode' => 'manual']);
     Pos::forceCreate(['id' => 20, 'walidata_id' => 1, 'nama' => 'ARR Sermo', 'tipe' => 'hidrometeorologi', 'jenis' => 'arr', 'metode' => 'manual']);
 });
-
-function akun(string $peran, array $atribut = []): Pengguna
-{
-    return Pengguna::create($atribut + ['username' => $peran, 'nama' => ucfirst($peran), 'peran' => $peran, 'password' => 'rahasia123', 'aktif' => true]);
-}
 
 function dugaAir(int $posId, string $waktu, float $tma = 1.2): PengamatanAwlr
 {

@@ -51,8 +51,7 @@ class DugaAirController extends Controller
                 $awal = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth();
                 $q->whereBetween('waktu', [$awal, $awal->copy()->endOfMonth()]);
             })
-            ->orderByDesc('waktu')
-            ->orderByDesc('id')
+            ->orderByDesc('id') // seperti aplikasi lama: terakhir diinput di atas
             ->paginate(50)
             ->withQueryString();
 

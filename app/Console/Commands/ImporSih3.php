@@ -491,6 +491,9 @@ class ImporSih3 extends Command
                     }
                     $input = $this->waktu($r->{$p.'_waktu_input'}) ?? $waktu;
                     $baris = [
+                        // ID lama dipertahankan: aplikasi lama mengurutkan daftar menurut urutan input (id terbesar),
+                        // dan klimat/mat/kualitas_air tidak punya waktu input yang terisi.
+                        'id' => $r->{$p.'_id'},
                         'pos_id' => $r->pos_id,
                         'waktu' => $waktu,
                         'keterangan' => $this->teks($r->{$p.'_keterangan'}),
@@ -531,6 +534,7 @@ class ImporSih3 extends Command
             $input = $this->waktu($r->{$p.'waktu_input'}) ?? $waktu;
 
             $id = $this->dst->table('pengamatan_kualitas_air')->insertGetId([
+                'id' => $r->kualitas_air_id, // ID lama dipertahankan (urutan input), lihat imporPengamatanManual
                 'pos_id' => $r->pos_id,
                 'waktu' => $waktu,
                 'lokasi' => $this->teks($r->{$p.'lokasi'}),

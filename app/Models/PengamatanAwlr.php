@@ -20,6 +20,10 @@ class PengamatanAwlr extends Model
             'limpas' => 'float',
             'intake_kiri' => 'float',
             'intake_kanan' => 'float',
+            'debit_pdam' => 'float',
+            'pembilas_kiri' => 'float',
+            'pembilas_kanan' => 'float',
+            'debit_suplesi' => 'float',
         ];
     }
 

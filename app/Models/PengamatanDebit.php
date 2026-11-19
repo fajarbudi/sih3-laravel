@@ -16,6 +16,9 @@ class PengamatanDebit extends Model
         return [
             'waktu' => 'datetime',
             'tervalidasi' => 'boolean',
+            'intake_kanan' => 'float',
+            'intake_kiri' => 'float',
+            'limpas' => 'float',
             'debit' => 'float',
         ];
     }

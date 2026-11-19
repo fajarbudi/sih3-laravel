@@ -44,7 +44,8 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/** Akun uji dengan peran tertentu (superadmin, admin_walidata, petugas_pos). */
+function akun(string $peran, array $atribut = []): App\Models\Pengguna
 {
-    // ..
+    return App\Models\Pengguna::create($atribut + ['username' => $peran, 'nama' => ucfirst($peran), 'peran' => $peran, 'password' => 'rahasia123', 'aktif' => true]);
 }
