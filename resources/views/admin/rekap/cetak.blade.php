@@ -22,7 +22,7 @@
 </head>
 <body>
     <h1>{{ $judul }}</h1>
-    <p>Portal SIH3 Wilayah Sungai Serayu Opak · {{ number_format($data->count(), 0, ',', '.') }} {{ isset($baris) ? 'baris' : 'data' }} · dicetak {{ now()->translatedFormat('j F Y, H.i') }}</p>
+    <p>Portal SIH3 Wilayah Sungai Serayu Opak · {{ number_format($data->count(), 0, ',', '.') }} {{ $satuanJumlah ?? (isset($baris) ? 'baris' : 'data') }} · dicetak {{ now()->translatedFormat('j F Y, H.i') }}</p>
     @include($tabel ?? 'admin.rekap.tabel', ['sel' => '', 'excel' => $excel ?? false])
     @unless ($excel ?? false)
         <script>window.addEventListener('load', () => window.print());</script>

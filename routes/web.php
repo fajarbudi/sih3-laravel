@@ -1,14 +1,18 @@
 <?php
 
 use App\Http\Controllers\Admin\CurahHujanController;
+use App\Http\Controllers\Admin\CurahHujanTelemetriController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DebitController;
 use App\Http\Controllers\Admin\DugaAirController;
 use App\Http\Controllers\Admin\KlimatologiController;
 use App\Http\Controllers\Admin\KualitasAirController;
+use App\Http\Controllers\Admin\MonitoringDugaAirController;
 use App\Http\Controllers\Admin\MukaAirTanahController;
 use App\Http\Controllers\Admin\RekapController;
+use App\Http\Controllers\Admin\RekapKualitasAirController;
 use App\Http\Controllers\Admin\RekapPivotController;
+use App\Http\Controllers\Admin\TelemetriPjtController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -80,6 +84,17 @@ Route::middleware('auth')->group(function () {
             Route::delete('{mukaAirTanah}', 'destroy')->name('.destroy');
         });
 
+        // Data telemetri PJT baca-saja (asal: Awlrpjt.php, Arrpjt.php)
+        foreach (array_keys(TelemetriPjtController::JENIS) as $jenis) {
+            Route::get($jenis, TelemetriPjtController::class)->defaults('jenis', $jenis)->name($jenis);
+        }
+
+        // Curah hujan telemetri per jam dalam satu hari hujan (asal: Arrtele.php)
+        Route::get('curah-hujan-telemetri', CurahHujanTelemetriController::class)->name('curah-hujan-telemetri');
+
+        // Monitoring pengisian duga air manual (asal: Mawlr.php)
+        Route::get('monitoring-duga-air', MonitoringDugaAirController::class)->name('monitoring-duga-air');
+
         // Rekapitulasi berbentuk daftar baca-saja per bulan (asal: Rawlr.php, Rklimat.php)
         foreach (array_keys(RekapController::JENIS) as $jenis) {
             Route::get('rekap/'.$jenis, RekapController::class)->defaults('jenis', $jenis)->name('rekap.'.$jenis);
@@ -89,5 +104,8 @@ Route::middleware('auth')->group(function () {
         foreach (array_keys(RekapPivotController::JENIS) as $jenis) {
             Route::get('rekap/'.$jenis, RekapPivotController::class)->defaults('jenis', $jenis)->name('rekap.'.$jenis);
         }
+
+        // Rekapitulasi kualitas air: satu pos setahun, ditranspos (asal: Rkualitas_air.php)
+        Route::get('rekap/kualitas-air', RekapKualitasAirController::class)->name('rekap.kualitas-air');
     });
 });

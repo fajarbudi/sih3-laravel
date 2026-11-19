@@ -303,11 +303,12 @@ class ImporSih3 extends Command
             }
         }
 
-        // PJT: pos dicocokkan dengan nama stasiun (Apipjt.php). TMA dikirim dalam cm (Gets.php membagi 100).
+        // PJT: pos dicocokkan dengan nama stasiun (Apipjt.php). TMA dalam meter: halaman admin lama Awlrpjt.php
+        // menampilkannya apa adanya (mis. Wadaslintang 167 m = elevasi waduk); pembagian 100 di Gets.php tidak konsisten
+        // (sebagian sudah dikomentari) dan tidak diikuti (keputusan user 2026-11-19).
         foreach ($posLama as $p) {
             if ((int) $p->walidata_id === self::WALIDATA_PJT && $p->pos_j === 'Telemetri') {
-                $faktor = $p->pos_jenis === 'AWLR' ? 0.01 : 1;
-                $simpan(SumberTelemetri::Pjt->value, $this->teks($p->pos_nama), $p->pos_id, $faktor);
+                $simpan(SumberTelemetri::Pjt->value, $this->teks($p->pos_nama), $p->pos_id, 1);
             }
         }
     }
@@ -597,7 +598,7 @@ class ImporSih3 extends Command
         $sumber = [
             'ana_higertech_arr' => $arr('higertech'),
             'ana_arr_tatonas' => $arr('tatonas'),
-            'ana_telemetri_arr' => $arr('pjt'),
+            'ana_telemetri_arr' => $arr('pjt') + ['campuran' => true],
             // Beacon tersimpan per jam: tanggal (arr_waktu DATE) + arr_jam.
             'ana_arr_beacon' => [
                 'tujuan' => 'telemetri_arr', 'sumber' => 'beacon', 'id' => 'arr_id',
@@ -612,7 +613,7 @@ class ImporSih3 extends Command
             'ana_awlr_tatonas' => $awlr('tatonas'),
             'ana_awlr_stesy' => $awlr('stesy'),
             'ana_awlr_login' => $awlr('login'),
-            'ana_telemetri_awlr' => $awlr('pjt'),
+            'ana_telemetri_awlr' => $awlr('pjt') + ['campuran' => true],
             'ana_klimatologi_tatonas' => [
                 'tujuan' => 'telemetri_klimatologi', 'sumber' => 'tatonas', 'id' => 'klimatologi_id',
                 'map' => fn ($r) => [
@@ -630,9 +631,16 @@ class ImporSih3 extends Command
             ],
         ];
 
+        // ana_telemetri_arr/awlr di aplikasi lama adalah tabel CAMPURAN: selain PJT, juga berisi salinan identik data
+        // pos vendor lain (Higertech/Tatonas/Stesy, pos BBWS). Baris pos yang punya perangkat vendor lain diberi sumber
+        // vendor itu, sehingga salinan yang dobel terbuang oleh kunci unik (pos_id, waktu, sumber) dan rekap per jam
+        // tidak menjumlah dua kali. Pos tanpa perangkat (mis. pos DPUP ESDM DIY) tetap berlabel pjt.
+        $sumberPos = $this->dst->table('perangkat_telemetri')->where('sumber', '!=', SumberTelemetri::Pjt->value)
+            ->orderBy('id')->pluck('sumber', 'pos_id');
+
         foreach ($sumber as $asal => $s) {
             $label = "{$s['tujuan']} <- {$asal}";
-            $this->src->table($asal)->chunkById(5000, function ($rows) use ($s, $label) {
+            $this->src->table($asal)->chunkById(5000, function ($rows) use ($s, $label, $sumberPos) {
                 $batch = [];
                 foreach ($rows as $r) {
                     if (! isset($this->posValid[$r->pos_id])) {
@@ -646,7 +654,8 @@ class ImporSih3 extends Command
 
                         continue;
                     }
-                    $batch[] = ['pos_id' => $r->pos_id, 'sumber' => $s['sumber']] + $baris + ['diterima_at' => $baris['waktu']];
+                    $sumberBaris = ! empty($s['campuran']) ? ($sumberPos[$r->pos_id] ?? $s['sumber']) : $s['sumber'];
+                    $batch[] = ['pos_id' => $r->pos_id, 'sumber' => $sumberBaris] + $baris + ['diterima_at' => $baris['waktu']];
                 }
                 $masuk = $batch ? $this->dst->table($s['tujuan'])->insertOrIgnore($batch) : 0;
                 $this->catat($label, 'diimpor', $masuk);

@@ -1,0 +1,69 @@
+@php
+    $pil = 'min-h-11 rounded-md border border-gray-200 bg-white px-2 text-sm text-gray-900 hover:bg-gray-50 focus:border-primary-500 focus:outline-none lg:min-h-7';
+    $tombol = 'flex min-h-11 items-center gap-1.5 rounded-md border border-gray-450 bg-white px-2.5 font-medium text-gray-800 hover:bg-gray-50 active:bg-gray-100 lg:min-h-7';
+    $kueri = array_filter(['pos' => $filter['pos'] ?? null, 'tahun' => $filter['tahun']]);
+    $diubah = ($daftarPos->count() > 1 && ($filter['pos'] ?? null)) || $filter['tahun'] !== now()->year;
+@endphp
+
+<x-layouts.admin judul="Rekap Kualitas Air" induk="Hidrologi" :penuh="true">
+    {{-- Cetak dan Excel memakai filter yang sedang aktif, seperti aplikasi lama. --}}
+    <x-slot:aksi>
+        @if ($filter['pos'])
+        <a href="{{ route('admin.rekap.kualitas-air', $kueri + ['format' => 'cetak']) }}" target="_blank" class="{{ $tombol }}">
+            <i class="bi bi-printer text-xs" aria-hidden="true"></i> Cetak
+        </a>
+        <a href="{{ route('admin.rekap.kualitas-air', $kueri + ['format' => 'excel']) }}" class="{{ $tombol }}">
+            <i class="bi bi-file-earmark-spreadsheet text-xs" aria-hidden="true"></i> Excel
+        </a>
+        @endif
+    </x-slot:aksi>
+
+    <x-slot:filter>
+        <form method="GET" class="flex flex-1 flex-wrap items-center gap-2">
+            <i class="bi bi-funnel text-gray-600" aria-hidden="true"></i>
+            @if ($daftarPos->count() > 1)
+                <label for="pos" class="sr-only">Pos</label>
+                <select id="pos" name="pos" onchange="this.form.requestSubmit()" class="{{ $pil }} max-w-48">
+                    <option value="">Pilih pos</option>
+                    @foreach ($daftarPos as $id => $nama)
+                        <option value="{{ $id }}" @selected(($filter['pos'] ?? null) == $id)>{{ $nama }}</option>
+                    @endforeach
+                </select>
+            @endif
+            {{-- Tahun selalu terisi; default tahun berjalan seperti aplikasi lama. --}}
+            <label for="tahun" class="sr-only">Tahun</label>
+            <select id="tahun" name="tahun" onchange="this.form.requestSubmit()" class="{{ $pil }}">
+                @foreach (range(now()->year, 2010) as $tahun)
+                    <option value="{{ $tahun }}" @selected($filter['tahun'] === $tahun)>Tahun {{ $tahun }}</option>
+                @endforeach
+            </select>
+            <noscript><button class="{{ $pil }}">Terapkan</button></noscript>
+            @if ($diubah)
+                <a href="{{ route('admin.rekap.kualitas-air') }}" class="flex min-h-11 items-center gap-1 rounded-md px-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 lg:min-h-7">
+                    <i class="bi bi-x-lg text-xs" aria-hidden="true"></i> Hapus filter
+                </a>
+            @endif
+            <p class="text-gray-600 tabular-nums">{{ number_format($sampel->count(), 0, ',', '.') }} sampel</p>
+        </form>
+    </x-slot:filter>
+
+    @if (! $filter['pos'])
+        {{-- Seperti aplikasi lama, rekap ini per satu pos: tabel kosong sampai pos dipilih. --}}
+        <div class="flex flex-col items-center px-4 py-24 text-center">
+            <i class="bi bi-droplet-half text-2xl text-gray-400" aria-hidden="true"></i>
+            <p class="mt-3 font-medium">Pilih pos untuk melihat rekap</p>
+            <p class="mt-1 text-gray-600">Rekap kualitas air ditampilkan per pos, satu kolom untuk setiap sampel.</p>
+        </div>
+    @elseif ($sampel->isEmpty())
+        <div class="flex flex-col items-center px-4 py-24 text-center">
+            <i class="bi bi-table text-2xl text-gray-400" aria-hidden="true"></i>
+            <p class="mt-3 font-medium">Tidak ada sampel pada tahun {{ $filter['tahun'] }}</p>
+            <p class="mt-1 text-gray-600">Pilih tahun lain atau pos lain.</p>
+        </div>
+    @else
+        {{-- Semua sampel setahun tanpa paginasi, seperti aplikasi lama. relative: caption sr-only tidak lolos dari wadah gulir. --}}
+        <div class="relative overflow-x-auto px-4 py-4 lg:px-6">
+            @include('admin.rekap.kualitas-air-tabel', ['sel' => 'border border-gray-200 px-2.5 py-2'])
+        </div>
+    @endif
+</x-layouts.admin>

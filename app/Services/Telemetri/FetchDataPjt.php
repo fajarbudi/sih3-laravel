@@ -17,7 +17,8 @@ use RuntimeException;
 /**
  * ARR & AWLR Perum Jasa Tirta I dari datatirta.jasatirta1.co.id (dulu Apipjt.php).
  * GET /access/{arr|awlr}/latest -> [{access: {lat, long}, data: {nama_station, datetime, ...}}]
- * Stasiun dicocokkan lewat nama; stasiun baru dibuatkan pos. TMA dikirim dalam cm (faktor_skala 0.01).
+ * Stasiun dicocokkan lewat nama; stasiun baru dibuatkan pos. TMA dalam meter (mis. elevasi Waduk Wadaslintang
+ * ~167 m), ditampilkan apa adanya seperti halaman admin lama Awlrpjt.php; faktor_skala 1.
  *
  * Token login disimpan di cache dan diperbarui otomatis saat ditolak (401).
  * Di aplikasi lama token diperbarui manual, sehingga penarikan berhenti diam-diam saat token kedaluwarsa.
@@ -110,7 +111,7 @@ class FetchDataPjt extends FetchData
             'pos_id' => $pos->id,
             'sumber' => SumberTelemetri::Pjt,
             'kode_perangkat' => $nama,
-            'faktor_skala' => $jenis === JenisPos::Awlr ? 0.01 : 1,
+            'faktor_skala' => 1,
         ])->setRelation('pos', $pos);
         $this->daftar->push($p);
 

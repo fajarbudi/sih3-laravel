@@ -2,9 +2,12 @@
 
 use App\Models\PengamatanArr;
 use App\Models\PengamatanAwlr;
+use App\Models\ParameterKualitasAir;
 use App\Models\PengamatanKlimatologi;
+use App\Models\PengamatanKualitasAir;
 use App\Models\PengamatanMat;
 use App\Models\Pos;
+use Database\Seeders\ParameterKualitasAirSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
@@ -138,4 +141,50 @@ it('rekap muka air tanah: satu baris per pos, default tahun berjalan', function 
 
     $this->get('/admin/rekap/muka-air-tanah?format=cetak')->assertOk()->assertSee('Rekapitulasi Muka Air Tanah Tahun '.now()->year);
     $this->get('/admin')->assertSee(route('admin.rekap.curah-hujan'))->assertSee(route('admin.rekap.muka-air-tanah'));
+});
+
+it('rekap kualitas air: kosong sampai pos dipilih, lalu ditranspos satu kolom per sampel', function () {
+    (new ParameterKualitasAirSeeder)->run();
+    Pos::forceCreate(['id' => 50, 'walidata_id' => 1, 'nama' => 'KA Kali Progo', 'tipe' => 'hidrologi', 'jenis' => 'kualitas_air', 'metode' => 'manual', 'das' => 'Progo']);
+    Pos::forceCreate(['id' => 51, 'walidata_id' => 1, 'nama' => 'KA Kali Opak', 'tipe' => 'hidrologi', 'jenis' => 'kualitas_air', 'metode' => 'manual']);
+    $ph = ParameterKualitasAir::where('kode', 'ph')->value('id');
+    $lama = PengamatanKualitasAir::create(['pos_id' => 50, 'waktu' => '2025-03-01', 'lokasi' => 'Hulu', 'cuaca' => '1.91']);
+    $lama->nilai()->create(['parameter_kualitas_air_id' => $ph, 'nilai' => 6.5]);
+    $baru = PengamatanKualitasAir::create(['pos_id' => 50, 'waktu' => '2025-01-15 07:00:00', 'lokasi' => 'Hilir', 'indeks_pencemaran' => 1.2345]);
+    $baru->nilai()->create(['parameter_kualitas_air_id' => $ph, 'nilai' => 7.25]);
+    PengamatanKualitasAir::create(['pos_id' => 50, 'waktu' => '2024-05-01', 'lokasi' => 'Tahun lalu']);
+    $this->actingAs(akun('superadmin'));
+
+    $this->get('/admin/rekap/kualitas-air?tahun=2025')->assertOk()->assertSee('Pilih pos untuk melihat rekap')->assertDontSee('format=excel', false);
+
+    $this->get('/admin/rekap/kualitas-air?tahun=2025&pos=50')
+        ->assertOk()
+        ->assertSee('2 sampel')
+        // kolom sampel bernomor, terakhir diinput dulu (Hilir id lebih besar)
+        ->assertSeeInOrder(['No.', 'Keterangan', '>1<', '>2<'], false)
+        ->assertSeeInOrder(['Tipe POS', 'Hidrologi', 'Hidrologi', 'Daerah Aliran Sungai POS', 'Progo', 'Progo'])
+        ->assertSeeInOrder(['Tanggal', '15 Januari 2025', '1 Maret 2025', 'Jam', '07:00:00', '00:00:00'])
+        ->assertSeeInOrder(['Lokasi Titik Pengamatan (Desa)/Kode', 'Hilir', 'Hulu'])
+        ->assertSeeInOrder(['pH', '7,25', '6,5'])
+        ->assertSeeInOrder(['Index Pencemaran', '1,2345'])
+        ->assertSeeInOrder(['Cuaca', '1.91']) // teks tidak diubah menjadi angka
+        ->assertDontSee('Tahun lalu');
+
+    $this->get('/admin/rekap/kualitas-air?tahun=2025&pos=50&format=excel')
+        ->assertHeader('Content-Disposition', 'attachment; filename="rekap-kualitas-air-50-2025.xls"')
+        ->assertSee('7.25');
+    $this->get('/admin')->assertSee(route('admin.rekap.kualitas-air'));
+});
+
+it('rekap kualitas air: petugas langsung melihat posnya, pos lain tidak bisa dipilih', function () {
+    (new ParameterKualitasAirSeeder)->run();
+    Pos::forceCreate(['id' => 50, 'walidata_id' => 1, 'nama' => 'KA Kali Progo', 'tipe' => 'hidrologi', 'jenis' => 'kualitas_air', 'metode' => 'manual']);
+    Pos::forceCreate(['id' => 52, 'walidata_id' => 11, 'nama' => 'KA PJT', 'tipe' => 'hidrologi', 'jenis' => 'kualitas_air', 'metode' => 'manual']);
+    PengamatanKualitasAir::create(['pos_id' => 50, 'waktu' => now()->startOfYear(), 'lokasi' => 'Lokasi Progo']);
+    PengamatanKualitasAir::create(['pos_id' => 52, 'waktu' => now()->startOfYear(), 'lokasi' => 'Lokasi PJT']);
+
+    $this->actingAs(akun('petugas_pos', ['pos_id' => 50]))->get('/admin/rekap/kualitas-air?pos=52')
+        ->assertOk()->assertSee('Lokasi Progo')->assertDontSee('Lokasi PJT');
+    $this->actingAs(akun('admin_walidata', ['walidata_id' => 1, 'username' => 'adm']))->get('/admin/rekap/kualitas-air?pos=52')
+        ->assertOk()->assertDontSee('Lokasi PJT');
 });

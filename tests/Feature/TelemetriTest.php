@@ -129,7 +129,7 @@ it('pjt: mencocokkan stasiun per jenis, membuat pos baru, dan login ulang saat t
     expect(nilaiTabel('telemetri_arr', 'hujan'))->toBe([[1454, '2026-11-19 01:00:00', 2.5]])
         ->and(DB::table('telemetri_awlr')->where('pos_id', 1475)->value('tma'))->toEqual(171.88);
     $baru = PerangkatTelemetri::where('kode_perangkat', 'POS BARU')->sole();
-    expect([$baru->faktor_skala, $baru->pos->walidata_id, $baru->pos->latitude])->toBe([0.01, 11, -7.65]);
+    expect([$baru->faktor_skala, $baru->pos->walidata_id, $baru->pos->latitude])->toBe([1.0, 11, -7.65]); // TMA PJT dalam meter (faktor 1)
 });
 
 it('beacon: memakai Basic Auth dan menimpa nilai jam yang masih berjalan', function () {
