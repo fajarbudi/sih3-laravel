@@ -38,6 +38,12 @@
     --color-primary-500: #0b63ce;
     --color-primary-600: #0a57b5;
     --color-primary-700: #08489a;
+    --color-primary-900: #0a2f5e;
+    --color-primary-950: #061a35;
+
+    /* Portal publik: Plus Jakarta Sans dan latar biru sangat muda untuk pita bagian. */
+    --font-portal: var(--font-jakarta), var(--font-inter), ui-sans-serif, sans-serif;
+    --color-langit: #f2f7fe;
 }
 
 @layer base {
@@ -46,4 +52,17 @@
     button, [role="button"], summary, label[for], select { cursor: pointer; }
     button:disabled { cursor: not-allowed; }
     :focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 1px; border-radius: 0.375rem; }
+    label:has(> input[type="checkbox"]) { cursor: pointer; }
 }
+
+/* Penanda pos di peta portal (resources/js/peta.js): ikon gambar aplikasi lama. */
+@layer components {
+    .leaflet-marker-icon:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; }
+}
+
+/* Penimpa CSS bawaan Leaflet (leaflet.css dimuat sesudah berkas ini, jadi selektor diberi #peta-leaflet agar menang):
+   huruf peta mengikuti halaman, dan <p> di popup tidak diberi margin 1.3em (baris popup tampak berjauhan). */
+#peta-leaflet.leaflet-container { font-family: inherit; }
+#peta-leaflet .leaflet-popup-content-wrapper { border-radius: 1rem; }
+#peta-leaflet .leaflet-popup-content { margin: 14px 18px; line-height: 1.5; }
+#peta-leaflet .leaflet-popup-content p { margin: 0; }

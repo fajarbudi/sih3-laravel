@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\DashboardController;
 use App\Models\Pengguna;
 use App\Models\PerangkatTelemetri;
 use App\Models\Pos;
@@ -90,7 +89,7 @@ it('dashboard superadmin: hujan dengan kategori BMKG, muka air dalam meter, dan 
 });
 
 it('kategori hujan harian mengikuti BMKG', function () {
-    expect(array_map([DashboardController::class, 'kategoriHujan'], [0.4, 5, 19.9, 20, 57.8, 100, 151]))
+    expect(array_map([App\Services\KondisiTerkini::class, 'kategoriHujan'], [0.4, 5, 19.9, 20, 57.8, 100, 151]))
         ->toBe(['Sangat ringan', 'Ringan', 'Ringan', 'Sedang', 'Lebat', 'Sangat lebat', 'Ekstrem']);
 });
 

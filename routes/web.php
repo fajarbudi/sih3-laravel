@@ -23,10 +23,11 @@ use App\Http\Controllers\Admin\RumusDebitController;
 use App\Http\Controllers\Admin\TelemetriPjtController;
 use App\Http\Controllers\Admin\UnduhDataController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\PortalController;
 use Illuminate\Support\Facades\Route;
 
-// Portal publik belum dibuat; sementara halaman utama langsung ke panel admin (tamu diarahkan ke login).
-Route::redirect('/', '/admin');
+// Portal publik (pengganti Portal.php lama)
+Route::get('/', [PortalController::class, 'beranda'])->name('beranda');
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');

@@ -1,5 +1,5 @@
 @php
-    use App\Http\Controllers\Admin\DashboardController;
+    use App\Services\KondisiTerkini;
 
     $angka = fn ($n, $desimal = 0) => number_format($n, $desimal, ',', '.');
     $tanggal = fn ($t, $format = 'j M') => \Illuminate\Support\Carbon::parse($t)->translatedFormat($format);
@@ -34,7 +34,7 @@
                 <div class="min-w-0 border-gray-200 px-5 py-5 max-lg:border-b lg:border-r">
                     <p class="text-gray-500">Tertinggi</p>
                     <p class="mt-1 text-5xl font-semibold tracking-tight">{{ $angka($hujanTertinggi, 1) }}<span class="ml-1 text-xl font-normal text-gray-500">mm</span></p>
-                    <p class="mt-2 font-medium">Hujan {{ Str::lower(DashboardController::kategoriHujan($hujanTertinggi)) }}</p>
+                    <p class="mt-2 font-medium">Hujan {{ Str::lower(KondisiTerkini::kategoriHujan($hujanTertinggi)) }}</p>
                     <p class="text-gray-500">{{ $hujanPerPos->keys()->first() }}</p>
 
                     <ol class="mt-6 space-y-2 border-t border-gray-100 pt-4">
