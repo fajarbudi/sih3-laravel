@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Enums\JenisPos;
 use App\Enums\TipePos;
+use App\Models\Galeri;
 use App\Models\Pos;
 use App\Models\Walidata;
 use App\Services\KondisiTerkini;
 use App\Services\NilaiTerakhirPos;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
@@ -45,19 +47,60 @@ class PortalController extends Controller
 
     public function beranda(KondisiTerkini $kondisi, NilaiTerakhirPos $nilaiTerakhir): View
     {
+        [$pos, $data] = $this->dataPeta($kondisi, $nilaiTerakhir);
+
+        return view('portal.beranda', $data + ['bidang' => $this->bidang($pos)]);
+    }
+
+    /** Peta pos pemantauan layar penuh (pengganti info/pos_pemantauan lama): peta + panel filter. */
+    public function posPemantauan(KondisiTerkini $kondisi, NilaiTerakhirPos $nilaiTerakhir): View
+    {
+        [, $data] = $this->dataPeta($kondisi, $nilaiTerakhir);
+
+        return view('portal.pos-pemantauan', $data);
+    }
+
+    /**
+     * Data peta bersama beranda dan halaman Pos Pemantauan: titik pos aktif berkoordinat, jumlah per kelompok, walidata.
+     *
+     * @return array{0: Collection<int, Pos>, 1: array<string, mixed>}
+     */
+    private function dataPeta(KondisiTerkini $kondisi, NilaiTerakhirPos $nilaiTerakhir): array
+    {
         $pos = Pos::with('walidata:id,nama', 'perangkatTelemetri', 'batasSiaga')->where('aktif', true)->orderBy('nama')->get();
         $nilai = $nilaiTerakhir->untuk($pos);
         $hujan24 = $kondisi->hujan24Jam($pos->modelKeys());
         $titik = $pos->filter(fn (Pos $p) => $p->latitude && $p->longitude)
             ->map(fn (Pos $p) => $this->titik($p, $nilai[$p->id], $hujan24[$p->id] ?? 0.0))->values();
 
-        return view('portal.beranda', [
+        return [$pos, [
             'titik' => $titik,
             'tanpaKoordinat' => $pos->count() - $titik->count(),
             'jumlahPerKelompok' => $titik->countBy('kel'),
             'jumlahPeringatan' => $titik->whereNotNull('kelas')->count(),
-            'bidang' => $this->bidang($pos),
             'walidata' => Walidata::withCount(['pos' => fn ($q) => $q->where('aktif', true)])->orderBy('urutan')->get(),
+        ]];
+    }
+
+    /**
+     * Isi jendela detail saat pos di peta diklik (pengganti portal/detilpos lama): nilai terkini + status, data pos,
+     * lokasi, walidata beserta kontaknya, dan foto pos terbaru dari galeri. Dimuat peta.js lewat fetch.
+     */
+    public function ringkasPos(Pos $pos, KondisiTerkini $kondisi, NilaiTerakhirPos $nilaiTerakhir): View
+    {
+        abort_unless($pos->aktif, 404);
+        $pos->load('walidata', 'perangkatTelemetri', 'batasSiaga');
+        $n = $nilaiTerakhir->untuk(collect([$pos]))[$pos->id];
+        $titik = $this->titik($pos, $n, $kondisi->hujan24Jam([$pos->id])[$pos->id] ?? 0.0);
+
+        // Foto terbaru yang terbit dan berkasnya memang ada di disk public (storage:link).
+        $foto = Galeri::with('lampiran')->where('pos_id', $pos->id)->where('terbit', true)->latest('tanggal')->get()
+            ->flatMap->lampiran->first(fn ($l) => $l->jenis === 'gambar' && Storage::disk('public')->exists($l->path));
+
+        return view('portal.pos-ringkas', [
+            'pos' => $pos,
+            't' => $titik,
+            'foto' => $foto ? Storage::disk('public')->url($foto->path) : null,
         ]);
     }
 
@@ -123,6 +166,7 @@ class PortalController extends Controller
         $kelas = $this->kelas($p, $n, $hujan24);
 
         return [
+            'id' => $p->id,
             'nama' => $p->nama,
             'lat' => (float) $p->latitude,
             'lng' => (float) $p->longitude,

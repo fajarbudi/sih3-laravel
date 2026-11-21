@@ -28,6 +28,9 @@ use Illuminate\Support\Facades\Route;
 
 // Portal publik (pengganti Portal.php lama)
 Route::get('/', [PortalController::class, 'beranda'])->name('beranda');
+Route::get('/pos/{pos}/ringkas', [PortalController::class, 'ringkasPos'])->name('portal.pos.ringkas');
+Route::get('/pos-pemantauan', [PortalController::class, 'posPemantauan'])->name('portal.pos');
+Route::view('/delineasi-dta', 'portal.delineasi')->name('portal.delineasi');
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');

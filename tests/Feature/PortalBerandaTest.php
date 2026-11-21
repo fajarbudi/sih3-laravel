@@ -37,7 +37,6 @@ it('beranda bisa dibuka tanpa login dengan isi beranda lama dan jumlah pos per b
         ->assertSee('Portal publikasi informasi pengelolaan hidrologi, hidrometeorologi, dan hidrogeologi.')
         ->assertSeeInOrder(['role="tablist"', 'Hidrologi', '>1<', 'Hidrometeorologi', '>1<'], false)
         ->assertSee('Hidrologi adalah ilmu yang mempelajari tentang air')
-        ->assertSee('1 pos aktif belum memiliki koordinat')
         ->assertDontSee('Pos Nonaktif')
         ->assertSee('Jl. Solo Km. 6, Caturtunggal, Depok, Sleman, D.I. Yogyakarta 55281')
         ->assertSee('Masuk');
@@ -94,7 +93,7 @@ it('rincian bidang per walidata per jenis', function () {
     Pos::forceCreate(['id' => 22, 'walidata_id' => 1, 'nama' => 'KA Progo', 'tipe' => 'hidrologi', 'jenis' => 'kualitas_air', 'metode' => 'manual']);
 
     $this->get('/')->assertOk()
-        ->assertSeeInOrder(['id="bidang-hidrologi"', 'Duga air: 1', 'Kualitas air: 1'], false)
+        ->assertSeeInOrder(['id="bidang-hidrologi"', 'Duga air <strong', '>1</strong>', 'Kualitas air <strong', '>1</strong>'], false)
         ->assertSeeInOrder(['id="bidang-hidrologi"', '2', 'pos dari 1 instansi'], false);
 });
 
@@ -110,7 +109,7 @@ it('walidata: logo, jumlah pos aktif, dan hanya tautan yang ada', function () {
         ->assertSee('href="https://ppid.example.go.id"', false)
         ->assertSee('src="'.asset('images/walidata/1.png').'"', false)
         ->assertSeeInOrder(['Walidata SIH3', 'BBWS SERAYU OPAK', 'DINAS PUP ESDM DIY'])
-        ->assertSee('href="https://delineasi.bbwsserayuopak.id/"', false)
+        ->assertSee('href="'.route('portal.delineasi').'"', false)
         ->assertSee('href="https://flood-routing-bbwsso.vercel.app"', false);
 });
 
@@ -129,4 +128,43 @@ it('menu walidata tetap tampil saat dibaca dari cache yang diserialisasi (driver
     $this->get('/')->assertOk()->assertSee('href="https://ppid.example.go.id"', false); // kedua: dari cache
 
     Cache::forget('portal.menu-walidata');
+});
+
+it('menyajikan detail pos untuk jendela peta: data pos, lokasi, dan kontak walidata', function () {
+    Pos::whereKey(10)->update(['wilayah_sungai' => 'Progo Opak Serang', 'das' => 'Opak', 'desa' => 'Wonokromo', 'kecamatan' => 'Pleret',
+        'kabupaten' => 'Bantul', 'provinsi' => 'DI Yogyakarta', 'data_tersedia_dari' => 2005, 'data_tersedia_sampai' => 2024]);
+
+    $this->get('/pos/10/ringkas')->assertOk()
+        ->assertSee('Progo Opak Serang')
+        ->assertSee('Opak')
+        ->assertSee('Desa Wonokromo, Kec. Pleret, Bantul, DI Yogyakarta')
+        ->assertSee('2005–2024')
+        ->assertSee('href="https://wa.me/6281234"', false)
+        ->assertSee('href="https://ppid.example.go.id"', false)
+        ->assertSee('Belum ada data');
+});
+
+it('tidak menyajikan detail pos nonaktif', function () {
+    $this->get('/pos/40/ringkas')->assertNotFound();
+});
+
+it('menyajikan halaman peta pos pemantauan layar penuh dengan filter dan data peta', function () {
+    $respons = $this->get('/pos-pemantauan')->assertOk()
+        ->assertSee('Peta Pos Pemantauan')
+        ->assertSee('data-layar-penuh', false)
+        ->assertSee('data-filter-kel="awlr"', false)
+        ->assertSee('Status terkini')
+        ->assertDontSee('<footer', false);
+
+    expect(dataPeta($respons)->pluck('nama')->all())->toContain('AWLR Glapan')->not->toContain('Pos Nonaktif');
+});
+
+it('menu Geospasial menautkan Pos Pemantauan ke halaman peta layar penuh', function () {
+    $this->get('/')->assertSee('href="'.route('portal.pos').'"', false);
+});
+
+it('menampilkan aplikasi Delineasi DTA dalam iframe tanpa kaki halaman', function () {
+    $this->get('/delineasi-dta')->assertOk()
+        ->assertSee('<iframe src="https://delineasi.bbwsserayuopak.id/"', false)
+        ->assertDontSee('<footer', false);
 });

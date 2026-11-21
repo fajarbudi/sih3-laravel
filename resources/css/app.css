@@ -66,3 +66,30 @@
 #peta-leaflet .leaflet-popup-content-wrapper { border-radius: 1rem; }
 #peta-leaflet .leaflet-popup-content { margin: 14px 18px; line-height: 1.5; }
 #peta-leaflet .leaflet-popup-content p { margin: 0; }
+/* Peta dasar sedikit diredupkan agar tidak silau (seperti portal live); penanda dan popup tidak terpengaruh. */
+#peta-leaflet .leaflet-tile-pane { filter: brightness(.94) saturate(.92); }
+
+/* Petunjuk "Ctrl + gulir" / "dua jari" di atas peta (resources/js/peta.js). */
+.peta-petunjuk {
+    position: absolute; inset: 0; z-index: 600; display: flex; align-items: center; justify-content: center;
+    padding: 1.25rem; text-align: center; font-weight: 600; color: #fff; background: rgb(16 24 40 / .45);
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.peta-petunjuk.tampil { opacity: 1; }
+
+/* Tombol Peta/Satelit: gambar kecil = tampilan tujuan. */
+#peta-leaflet .peta-dasar {
+    position: relative; overflow: hidden; width: 60px; height: 60px; margin: 0 0 10px 10px; padding: 0;
+    background: #dfe7ef url('https://tile.openstreetmap.org/10/824/533.png') center / cover;
+    border: 2px solid #fff; border-radius: 12px; box-shadow: 0 4px 16px rgb(16 24 40 / .22);
+}
+#peta-leaflet .peta-dasar.ke-satelit { background-image: url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/10/533/824'); }
+#peta-leaflet .peta-dasar:hover { box-shadow: 0 8px 22px rgb(16 24 40 / .3); }
+#peta-leaflet .peta-dasar span {
+    position: absolute; inset: auto 0 0; padding: 14px 4px 4px; font-size: 12px; font-weight: 700; line-height: 1;
+    color: #fff; background: linear-gradient(to top, rgb(0 0 0 / .65), transparent);
+}
+@media (min-width: 640px) { #peta-leaflet .peta-dasar { width: 72px; height: 72px; margin: 0 0 14px 12px; } }
+/* Di halaman layar penuh tombol Peta/Satelit berada di kanan (di atas zoom): jarak ke tepi kanan, bukan kiri. */
+#peta-leaflet .leaflet-right .peta-dasar { margin: 0 10px 10px 0; }
+@media (min-width: 640px) { #peta-leaflet .leaflet-right .peta-dasar { margin: 0 12px 12px 0; } }

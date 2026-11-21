@@ -2,19 +2,20 @@
     Tata letak portal publik, mengikuti portal live lama (sih3.bbwsserayuopak.id) yang dinilai user lebih bagus:
     Plus Jakarta Sans, header transparan di atas foto hero (logo dan menu putih) yang menjadi putih saat digulir,
     tombol Masuk kuning, kaki ringkas biru tua.
-    Menu mengikuti menu AKTIF portal lama: Beranda, Geospasial (Pos Pemantauan; Delineasi DTA dan FloodRouting = aplikasi
+    Menu mengikuti menu AKTIF portal lama: Beranda, Geospasial (Pos Pemantauan; Delineasi DTA dalam iframe; FloodRouting = aplikasi
     terpisah), Walidata (website, PPID, WhatsApp per walidata dari database), Masuk. Menu Informasi H3 dan Publikasi
     ditambahkan saat halamannya dibuat (tidak ada tautan ke halaman yang belum ada).
     Dropdown memakai <details>: bisa dipakai dengan papan ketik tanpa skrip; skrip kecil hanya menutup dropdown lain/klik di luar.
 
     Pakai: <x-layouts.portal judul="..." deskripsi="..." :hero-gelap="true">isi</x-layouts.portal>
     hero-gelap: halaman diawali hero foto gelap; header transparan selama berada di atasnya.
+    tanpa-kaki: tanpa kaki halaman (halaman peta layar penuh, agar halaman tidak tergulir; seperti portal live).
 --}}
-@props(['judul' => null, 'heroGelap' => false, 'deskripsi' => 'Portal SIH3 Wilayah Sungai Serayu Opak menyajikan data hidrologi, hidrometeorologi, dan hidrogeologi: tinggi muka air, curah hujan, klimatologi, muka air tanah, dan kualitas air.'])
+@props(['judul' => null, 'heroGelap' => false, 'tanpaKaki' => false, 'deskripsi' => 'Portal SIH3 Wilayah Sungai Serayu Opak menyajikan data hidrologi, hidrometeorologi, dan hidrogeologi: tinggi muka air, curah hujan, klimatologi, muka air tanah, dan kualitas air.'])
 @php
     $geospasial = [
-        ['Pos Pemantauan', route('beranda').'#peta', false],
-        ['Delineasi DTA', 'https://delineasi.bbwsserayuopak.id/', true],
+        ['Pos Pemantauan', route('portal.pos'), false],
+        ['Delineasi DTA', route('portal.delineasi'), false],
         ['FloodRouting', 'https://flood-routing-bbwsso.vercel.app', true],
     ];
     $tautanMenu = 'flex min-h-11 items-center gap-2 rounded-lg px-3 text-gray-700 hover:bg-gray-50 hover:text-primary-700';
@@ -64,8 +65,15 @@
                 @if ($menuWalidata->isNotEmpty())
                     <details class="relative" data-dropdown>
                         <summary class="{{ $tombolMenu }}">Walidata <i class="bi bi-chevron-down text-xs" aria-hidden="true"></i></summary>
-                        <div class="{{ $panel }} max-h-[70vh] w-80 overflow-y-auto">
-                            @include('portal.menu-walidata', ['tautanMenu' => $tautanMenu])
+                        {{-- Panel lebar 2 kolom: semua instansi tampil tanpa digulir (11 walidata = 6 baris). --}}
+                        <div class="absolute right-0 top-full z-[1100] mt-3 max-h-[calc(100vh-6rem)] w-[min(50rem,calc(100vw-4rem))] overflow-y-auto rounded-3xl bg-white p-3 text-gray-900 shadow-2xl shadow-gray-950/15 ring-1 ring-gray-950/5">
+                            <div class="flex items-baseline justify-between gap-4 px-2.5 pb-2 pt-1.5">
+                                <p class="font-bold text-gray-950">Walidata SIH3</p>
+                                <p class="text-xs text-gray-600">{{ $menuWalidata->count() }} instansi pengelola data</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                                @include('portal.menu-walidata')
+                            </div>
                         </div>
                     </details>
                 @endif
@@ -79,7 +87,7 @@
                 <summary class="flex size-11 list-none items-center justify-center rounded-full text-gray-800 hover:bg-gray-100 group-data-[atas]/kepala:text-white group-data-[atas]/kepala:hover:bg-white/10 [&::-webkit-details-marker]:hidden" aria-label="Buka menu">
                     <i class="bi bi-list text-2xl" aria-hidden="true"></i>
                 </summary>
-                <nav aria-label="Menu utama" class="fixed inset-x-0 top-16 z-[1100] max-h-[calc(100vh-4rem)] overflow-y-auto rounded-b-2xl border-b border-gray-100 bg-white px-4 py-3 text-gray-900 shadow-xl shadow-gray-950/10">
+                <nav aria-label="Menu utama" class="fixed inset-x-0 top-16 z-[1100] max-h-[calc(100vh-4rem)] overflow-y-auto rounded-b-2xl border-b border-gray-100 bg-white px-3 py-3 text-gray-900 shadow-xl shadow-gray-950/10">
                     <a href="{{ route('beranda') }}" class="{{ $tautanMenu }} font-semibold">Beranda</a>
                     <p class="mt-3 px-3 text-sm font-semibold text-gray-600">Geospasial</p>
                     @foreach ($geospasial as [$teks, $url, $luar])
@@ -89,7 +97,9 @@
                     @endforeach
                     @if ($menuWalidata->isNotEmpty())
                         <p class="mt-3 px-3 text-sm font-semibold text-gray-600">Walidata</p>
-                        @include('portal.menu-walidata', ['tautanMenu' => $tautanMenu])
+                        <div class="mt-1 space-y-0.5">
+                            @include('portal.menu-walidata')
+                        </div>
                     @endif
                     <a href="{{ $urlMasuk }}" class="mt-3 flex min-h-11 items-center justify-center rounded-full bg-amber-400 px-4 font-bold text-gray-950 hover:bg-amber-300">
                         {{ auth()->check() ? 'Panel admin' : 'Masuk' }}
@@ -104,6 +114,7 @@
     </main>
 
     {{-- Kaki ringkas seperti portal lama: logo SIH3, nama balai, alamat; hak cipta di kanan. --}}
+    @unless ($tanpaKaki)
     <footer class="bg-primary-950 text-sm text-white/80">
         <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6 px-4 py-8 lg:px-8">
             <div class="flex items-center gap-3">
@@ -116,6 +127,7 @@
             <p>&copy; {{ now()->year }} Portal SIH3, powered by <strong class="font-bold text-amber-300">Anauri</strong></p>
         </div>
     </footer>
+    @endunless
 
     <script>
         // Satu dropdown terbuka sekaligus; klik di luar atau Escape menutupnya.
