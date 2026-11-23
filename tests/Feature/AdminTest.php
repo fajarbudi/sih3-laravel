@@ -83,9 +83,34 @@ it('dashboard superadmin: hujan dengan kategori BMKG, muka air dalam meter, dan 
         ->assertViewHas('posNaik', 1)
         ->assertViewHas('cuaca', fn ($c) => $c->count() === 1 && $c[0]->nama === 'Klimatologi Sermo')
         ->assertSee('Hujan ringan')
-        ->assertSee('↑ 10 cm')
+        ->assertSeeText('naik 10 cm')
         ->assertSee('Muka air')
         ->assertSee("new Chart(document.getElementById('grafik-hujan-jam')", false);
+});
+
+it('dashboard: ringkasan siaga, telemetri yang tidak mengirim data, dan pengisian manual kemarin (WIB)', function () {
+    $z = 'Asia/Jakarta';
+    $kini = now($z)->startOfHour();
+    // Pos 10 telemetri mengirim 2,5 m, di atas batas Siaga (level 3) 2,0 m.
+    PerangkatTelemetri::create(['pos_id' => 10, 'sumber' => 'pjt', 'kode_perangkat' => 'A', 'faktor_skala' => 1]);
+    DB::table('telemetri_awlr')->insert(['pos_id' => 10, 'sumber' => 'pjt', 'waktu' => $kini->toDateTimeString(), 'tma' => 2.5]);
+    DB::table('batas_siaga')->insert([['pos_id' => 10, 'level' => 2, 'nilai' => 1.5], ['pos_id' => 10, 'level' => 3, 'nilai' => 2.0]]);
+    // Pos telemetri tanpa data: tidak mengirim.
+    Pos::forceCreate(['id' => 31, 'walidata_id' => 1, 'nama' => 'AWLR Mati', 'tipe' => 'hidrologi', 'jenis' => 'awlr', 'metode' => 'telemetri']);
+    PerangkatTelemetri::create(['pos_id' => 31, 'sumber' => 'stesy', 'kode_perangkat' => 'B', 'faktor_skala' => 1]);
+    // Dua pos manual duga air, satu diisi kemarin (tanggal WIB).
+    Pos::forceCreate(['id' => 40, 'walidata_id' => 1, 'nama' => 'Manual A', 'tipe' => 'hidrologi', 'jenis' => 'awlr', 'metode' => 'manual']);
+    Pos::forceCreate(['id' => 41, 'walidata_id' => 1, 'nama' => 'Manual B', 'tipe' => 'hidrologi', 'jenis' => 'awlr', 'metode' => 'manual']);
+    DB::table('pengamatan_awlr')->insert(['pos_id' => 40, 'waktu' => today($z)->subDay()->setTime(7, 0)->toDateTimeString(), 'tma' => 1]);
+
+    $this->actingAs(pengguna('superadmin'))->get('/admin')
+        ->assertOk()
+        ->assertViewHas('siaga', fn ($s) => $s->count() === 1 && $s[0]['label'] === 'Siaga')
+        ->assertViewHas('telemetri', fn ($t) => $t['mati']->pluck('nama')->contains('AWLR Mati') && $t['mati']->firstWhere('nama', 'AWLR Mati')['sumber'] === 'Stesy')
+        ->assertViewHas('manual', fn ($m) => $m['awlr']['isi'] === 1 && $m['awlr']['total'] === 2 && $m['awlr']['rute'] === 'admin.monitoring-duga-air')
+        ->assertSee('Pos di atas batas siaga')
+        ->assertSeeText('AWLR Mati · Stesy')
+        ->assertSee(today($z)->subDay()->translatedFormat('j F Y'));
 });
 
 it('kategori hujan harian mengikuti BMKG', function () {

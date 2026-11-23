@@ -32,6 +32,13 @@ Route::get('/pos/{pos}/ringkas', [PortalController::class, 'ringkasPos'])->name(
 Route::get('/pos/{pos}/arsip', [PortalController::class, 'arsipPos'])->name('portal.pos.arsip');
 Route::get('/datasheet/{tipe}', [PortalController::class, 'datasheet'])->name('portal.datasheet');
 Route::get('/pos-pemantauan', [PortalController::class, 'posPemantauan'])->name('portal.pos');
+Route::controller(App\Http\Controllers\PublikasiController::class)->prefix('publikasi')->name('portal.')->group(function () {
+    Route::get('dokumen', 'dokumen')->name('dokumen');
+    Route::get('peta', 'peta')->name('peta');
+    Route::get('buletin', 'buletin')->name('buletin');
+    Route::get('buletin/{slug}', 'buletinKategori')->name('buletin.kategori');
+    Route::get('album', 'album')->name('album');
+});
 Route::view('/delineasi-dta', 'portal.delineasi')->name('portal.delineasi');
 
 Route::middleware('guest')->group(function () {

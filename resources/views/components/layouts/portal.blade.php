@@ -3,8 +3,8 @@
     Plus Jakarta Sans, header transparan di atas foto hero (logo dan menu putih) yang menjadi putih saat digulir,
     tombol Masuk kuning, kaki ringkas biru tua.
     Menu mengikuti menu AKTIF portal lama: Beranda, Geospasial (Pos Pemantauan; Delineasi DTA dalam iframe; FloodRouting = aplikasi
-    terpisah), Informasi H3 (datasheet per bidang), Walidata (website, PPID, WhatsApp per walidata dari database), Masuk.
-    Menu Publikasi ditambahkan saat halamannya dibuat (tidak ada tautan ke halaman yang belum ada).
+    terpisah), Informasi H3 (datasheet per bidang), Publikasi (dokumen, peta, buletin, album kegiatan), Walidata (website, PPID,
+    WhatsApp per walidata dari database), Masuk.
     Dropdown memakai <details>: bisa dipakai dengan papan ketik tanpa skrip; skrip kecil hanya menutup dropdown lain/klik di luar.
 
     Pakai: <x-layouts.portal judul="..." deskripsi="..." :hero-gelap="true">isi</x-layouts.portal>
@@ -17,6 +17,12 @@
         ['Pos Pemantauan', route('portal.pos'), false],
         ['Delineasi DTA', route('portal.delineasi'), false],
         ['FloodRouting', 'https://flood-routing-bbwsso.vercel.app', true],
+    ];
+    $publikasi = [
+        ['Dokumen', route('portal.dokumen')],
+        ['Peta', route('portal.peta')],
+        ['Buletin', route('portal.buletin')],
+        ['Album Kegiatan', route('portal.album')],
     ];
     $informasiH3 = collect(App\Enums\TipePos::cases())->map(fn ($t) => [$t->label(), route('portal.datasheet', $t), false])->all();
     $tautanMenu = 'flex min-h-11 items-center gap-2 rounded-lg px-3 text-gray-700 hover:bg-gray-50 hover:text-primary-700';
@@ -71,6 +77,14 @@
                         @endforeach
                     </div>
                 </details>
+                <details class="relative" data-dropdown>
+                    <summary class="{{ $tombolMenu }}">Publikasi <i class="bi bi-chevron-down text-xs" aria-hidden="true"></i></summary>
+                    <div class="{{ $panel }}">
+                        @foreach ($publikasi as [$teks, $url])
+                            <a href="{{ $url }}" @if (url()->current() === $url) aria-current="page" @endif class="{{ $tautanMenu }}">{{ $teks }}</a>
+                        @endforeach
+                    </div>
+                </details>
                 @if ($menuWalidata->isNotEmpty())
                     <details class="relative" data-dropdown>
                         <summary class="{{ $tombolMenu }}">Walidata <i class="bi bi-chevron-down text-xs" aria-hidden="true"></i></summary>
@@ -106,6 +120,10 @@
                     @endforeach
                     <p class="mt-3 px-3 text-sm font-semibold text-gray-600">Informasi H3</p>
                     @foreach ($informasiH3 as [$teks, $url])
+                        <a href="{{ $url }}" @if (url()->current() === $url) aria-current="page" @endif class="{{ $tautanMenu }}">{{ $teks }}</a>
+                    @endforeach
+                    <p class="mt-3 px-3 text-sm font-semibold text-gray-600">Publikasi</p>
+                    @foreach ($publikasi as [$teks, $url])
                         <a href="{{ $url }}" @if (url()->current() === $url) aria-current="page" @endif class="{{ $tautanMenu }}">{{ $teks }}</a>
                     @endforeach
                     @if ($menuWalidata->isNotEmpty())

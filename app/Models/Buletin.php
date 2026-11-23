@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -19,6 +20,12 @@ class Buletin extends Model
             'terbit' => 'boolean',
             'tanggal' => 'datetime',
         ];
+    }
+
+    /** Judul buletin otomatis dari situs BMKG kadang tersimpan dengan entitas HTML (mis. &#8211;); tampilkan sebagai teks biasa. */
+    protected function judul(): Attribute
+    {
+        return Attribute::get(fn (?string $nilai) => $nilai === null ? null : html_entity_decode($nilai, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
     public function kategori(): BelongsTo
