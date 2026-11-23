@@ -3,7 +3,7 @@
     Isi mengikuti portal/detilpos lama: nilai terkini + kelas, data pos, lokasi, walidata + kontak, foto pos.
     Tampilan "lebih fresh" (permintaan user): lokasi di atas, ubin nilai bergradasi, data pos sebagai kartu kecil berikon,
     kontak walidata sebagai tombol pil.
-    Tautan "Lihat peta lokasi" dan arsip data lama belum ada karena halaman datasheet/arsip belum dibuat.
+    Arsip data ada di tab terpisah pada halaman datasheet (portal.pos-arsip).
 --}}
 @php
     $berkas = ['awlr' => 'dugaair', 'kualitas_air' => 'kualitasair', 'arr' => 'curahhujan', 'klimatologi' => 'klimatologi', 'mat' => 'mat'][$t['kel']];

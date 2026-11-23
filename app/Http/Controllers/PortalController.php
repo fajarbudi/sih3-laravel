@@ -9,12 +9,13 @@ use App\Models\Pos;
 use App\Models\Walidata;
 use App\Services\KondisiTerkini;
 use App\Services\NilaiTerakhirPos;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
- * Portal publik (pengganti Portal.php lama). Tahap 1: beranda.
+ * Portal publik (pengganti Portal.php lama): beranda, pos pemantauan, Informasi H3 (datasheet).
  *
  * Isi mengikuti beranda lama (sih3.bbwsserayuopak.id): peta sebaran pos dengan filter jenis/walidata dan mode
  * "pos peringatan" (kelas hujan, status duga air, kelas kualitas air), tiga bidang pemantauan dengan rincian
@@ -101,6 +102,47 @@ class PortalController extends Controller
             'pos' => $pos,
             't' => $titik,
             'foto' => $foto ? Storage::disk('public')->url($foto->path) : null,
+        ]);
+    }
+
+    /**
+     * Informasi H3 per bidang (pengganti datasheet/{tipe} lama): daftar pos aktif bidang itu, urut walidata lalu lintang
+     * seperti lama. Filter jenis, walidata, dan DAS lewat URL; pencarian cepat di sisi peramban.
+     */
+    public function datasheet(TipePos $tipe, Request $request): View
+    {
+        $semua = Pos::with('walidata:id,nama')->withCount('arsip')->where('aktif', true)->where('tipe', $tipe)->get()
+            ->sortBy([fn ($a, $b) => strcmp($a->walidata?->nama ?? '~', $b->walidata?->nama ?? '~'), ['latitude', 'asc']])->values();
+
+        $pos = $semua
+            ->when($request->query('jenis'), fn ($c, $j) => $c->filter(fn (Pos $p) => $p->jenis->value === $j))
+            ->when($request->integer('walidata'), fn ($c, $w) => $c->where('walidata_id', $w))
+            ->when($request->query('das'), fn ($c, $d) => $c->where('das', $d))
+            ->values();
+
+        return view('portal.datasheet', [
+            'tipe' => $tipe,
+            'definisi' => self::DEFINISI[$tipe->value],
+            'pos' => $pos,
+            'jumlahSemua' => $semua->count(),
+            // Per jenis asli (AGWLR terpisah dari MAT, seperti datasheet lama; di peta keduanya digabung).
+            'jumlahPerJenis' => $semua->countBy(fn (Pos $p) => $p->jenis->value),
+            'pilihanWalidata' => $semua->pluck('walidata.nama', 'walidata_id')->filter()->sort(),
+            'pilihanDas' => $semua->pluck('das')->filter()->unique()->sort()->values(),
+        ]);
+    }
+
+    /**
+     * Tab "Arsip data" di jendela detail datasheet (pengganti portal/detilarsip lama): tahun arsip pos, dengan tautan
+     * website dan permintaan data (PPID) walidata seperti lama.
+     */
+    public function arsipPos(Pos $pos): View
+    {
+        abort_unless($pos->aktif, 404);
+
+        return view('portal.pos-arsip', [
+            'pos' => $pos->load('walidata'),
+            'tahun' => $pos->arsip()->orderByDesc('tahun')->pluck('tahun')->unique()->values(),
         ]);
     }
 
