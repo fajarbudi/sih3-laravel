@@ -9,6 +9,7 @@ use App\Models\ParameterInstrumen;
 use App\Models\PerangkatTelemetri;
 use App\Models\Pos;
 use Carbon\CarbonInterface;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -42,7 +43,12 @@ class FetchDataSermo extends FetchData
     public function fetch(?CarbonInterface $dari, ?CarbonInterface $sampai): int
     {
         $sampai ??= now();
-        $this->daftarkanPerangkat($this->api('get-lastvalue.php'));
+        // Gagal mengambil daftar perangkat tidak menghentikan penarikan data perangkat yang sudah terdaftar.
+        try {
+            $this->daftarkanPerangkat($this->api('get-lastvalue.php'));
+        } catch (RuntimeException $e) {
+            $this->catatGagal(null, "get-lastvalue: {$e->getMessage()}");
+        }
 
         $perangkat = $this->perangkat();
         $awlr = $perangkat->whereNotNull('sensor')->groupBy('kode_perangkat');
@@ -229,9 +235,13 @@ class FetchDataSermo extends FetchData
 
     private function api(string $endpoint, array $query = []): array
     {
-        $respons = Http::withToken((string) config('services.sermo.token'))
-            ->timeout(30)
-            ->get(config('services.sermo.url')."/{$endpoint}", $query);
+        try {
+            $respons = Http::withToken((string) config('services.sermo.token'))
+                ->timeout(30)
+                ->get(config('services.sermo.url')."/{$endpoint}", $query);
+        } catch (ConnectionException $e) {
+            throw new RuntimeException($e->getMessage(), previous: $e);
+        }
 
         // Respons Sermo diawali BOM.
         $data = json_decode(preg_replace('/^\xEF\xBB\xBF/', '', $respons->body()), true);

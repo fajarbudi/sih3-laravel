@@ -38,7 +38,11 @@ class FetchDataPjt extends FetchData
         $jumlah = 0;
 
         foreach ([JenisPos::Arr, JenisPos::Awlr] as $jenis) {
-            $respons = $this->ambil("access/{$jenis->value}/latest");
+            // Timeout ARR tidak boleh menggagalkan AWLR (dan sebaliknya).
+            $respons = $this->coba(null, fn () => $this->ambil("access/{$jenis->value}/latest"));
+            if (! $respons) {
+                continue;
+            }
             if ($respons->failed()) {
                 $this->catatGagal(null, "{$jenis->value}/latest HTTP {$respons->status()}");
 

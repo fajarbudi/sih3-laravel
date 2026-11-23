@@ -6,6 +6,7 @@ use App\Models\PerangkatTelemetri;
 use App\Models\Pos;
 use App\Services\RekapTelemetri;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -152,6 +153,17 @@ it('beacon: memakai Basic Auth dan menimpa nilai jam yang masih berjalan', funct
         && $r->hasHeader('Authorization', 'Basic '.base64_encode('admin:rahasia')));
 });
 
+it('beacon: logger ARR lama dengan parameter Precipitation_Intensity tetap tersimpan', function () {
+    buatPerangkat(1148, 'arr', 'beacon', '10056');
+    Http::fake(['*' => Http::response(['status' => true, 'data' => [
+        ['waktu' => '2026-11-19 01:00:00', 'data' => [['nama_parameter' => 'Precipitation_Intensity', 'nilai' => 9.4], ['nama_parameter' => 'Humidity_Logger', 'nilai' => 46.9]]],
+    ]])]);
+
+    $this->artisan('telemetri:fetch', ['sumber' => 'beacon'])->assertSuccessful();
+
+    expect(nilaiTabel('telemetri_arr', 'hujan'))->toBe([[1148, '2026-11-19 01:00:00', 9.4]]);
+});
+
 it('sermo: mendaftarkan perangkat, mengubah UTC ke WIB, membuang nilai error, satu bacaan per 5 menit', function () {
     config(['services.sermo.token' => 'uji', 'services.sermo.walidata_id' => 1]);
     buatPerangkat(1900, 'awlr', 'login', 'SOWL024'); // Ngrancah sudah ada lewat PCB Jogja
@@ -196,6 +208,32 @@ it('sermo: mendaftarkan perangkat, mengubah UTC ke WIB, membuang nilai error, sa
     $klim = DB::table('telemetri_klimatologi')->sole();
     expect([(float) $klim->hujan, (float) $klim->suhu])->toBe([0.02, 25.6])
         ->and(DB::table('telemetri_instrumen')->value('nilai'))->toEqual(0.03);
+});
+
+it('timeout satu perangkat tidak menghentikan perangkat lain', function () {
+    config(['services.higertech.url' => 'https://higertech.test']);
+    buatPerangkat(1730, 'arr', 'higertech', 'MATI');
+    buatPerangkat(1731, 'arr', 'higertech', 'HIDUP');
+    Http::fake(fn (Request $r) => str_contains($r->url(), 'MATI')
+        ? throw new ConnectionException('cURL error 28: Connection timeout')
+        : Http::response(['response' => [['reading_at' => '2026-11-19 01:00:00', 'rainfall' => 1.5]]]));
+
+    $this->artisan('telemetri:fetch', ['sumber' => 'higertech'])->assertSuccessful();
+
+    expect(nilaiTabel('telemetri_arr', 'hujan'))->toBe([[1731, '2026-11-19 01:00:00', 1.5]])
+        ->and(LogTelemetri::sole())->kode_perangkat->toBe('MATI');
+});
+
+it('sermo: daftar perangkat timeout, data perangkat terdaftar tetap ditarik', function () {
+    buatPerangkat(1900, 'awlr', 'sermo', 'SOWL024', '1');
+    Http::fake(fn (Request $r) => str_contains($r->url(), 'get-lastvalue')
+        ? throw new ConnectionException('cURL error 28: Connection timeout')
+        : Http::response([['params' => ['1' => ['data' => [['timestamp' => '2026-11-18T18:00:00Z', 'value' => 0.05]]]]]]));
+
+    $this->artisan('telemetri:fetch', ['sumber' => 'sermo'])->assertSuccessful();
+
+    expect(nilaiTabel('telemetri_awlr', 'tma'))->toBe([[1900, '2026-11-19 01:00:00', 0.05]])
+        ->and(LogTelemetri::sole()->pesan)->toContain('get-lastvalue');
 });
 
 it('mencatat kegagalan yang tidak terduga ke log_telemetri', function () {

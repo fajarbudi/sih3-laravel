@@ -15,9 +15,12 @@ use Illuminate\Support\Facades\Http;
  */
 class FetchDataBeacon extends FetchData
 {
-    /** Nama parameter tidak terdokumentasi lengkap, jadi dicocokkan dengan pola. */
+    /**
+     * Nama parameter tidak terdokumentasi lengkap, jadi dicocokkan dengan pola. Logger ARR lama mengirim
+     * "Precipitation_Intensity" (bukan "Curah_Hujan"); nilainya per bacaan dan dijumlah API seperti Curah_Hujan.
+     */
     private const JENIS = [
-        'arr' => ['telemetri_arr', 'hujan', '/hujan|rain/i'],
+        'arr' => ['telemetri_arr', 'hujan', '/hujan|rain|precipitation/i'],
         'awlr' => ['telemetri_awlr', 'tma', '/muka.?air|tma|water.?level/i'],
     ];
 
@@ -39,14 +42,17 @@ class FetchDataBeacon extends FetchData
             $mulai = $dari ?? ($this->waktuTerakhir($p, $tabel) ?? $sampai)->max(now($this->zona())->subDays(7));
 
             foreach ($this->potongRentang($mulai->copy()->startOfDay(), $sampai, 31) as [$a, $b]) {
-                $respons = Http::withBasicAuth((string) config('services.beacon.username'), (string) config('services.beacon.password'))
+                $respons = $this->coba($p->kode_perangkat, fn () => Http::withBasicAuth((string) config('services.beacon.username'), (string) config('services.beacon.password'))
                     ->timeout(90)
                     ->get(config('services.beacon.url').'/range_tanggal', [
                         'id_logger' => $p->kode_perangkat,
                         'awal' => $a->toDateString(),
                         'akhir' => $b->toDateString(),
                         'interval' => 'jam',
-                    ]);
+                    ]));
+                if (! $respons) {
+                    continue;
+                }
                 if ($respons->json('status') !== true) {
                     $this->catatGagal($p->kode_perangkat, $respons->json('pesan') ?? "HTTP {$respons->status()}");
 

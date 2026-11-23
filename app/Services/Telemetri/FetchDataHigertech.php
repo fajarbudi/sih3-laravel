@@ -32,10 +32,13 @@ class FetchDataHigertech extends FetchData
             $mulai = $dari ?? $this->waktuTerakhir($p, $tabel) ?? $sampai;
 
             foreach ($this->potongRentang($mulai->copy()->startOfDay(), $sampai, 31) as [$a, $b]) {
-                $respons = Http::timeout(60)->get(config('services.higertech.url')."/reading/device/{$p->kode_perangkat}", [
+                $respons = $this->coba($p->kode_perangkat, fn () => Http::timeout(60)->get(config('services.higertech.url')."/reading/device/{$p->kode_perangkat}", [
                     'from' => $a->toDateString(),
                     'to' => $b->toDateString(),
-                ]);
+                ]));
+                if (! $respons) {
+                    continue;
+                }
                 if ($respons->failed()) {
                     $this->catatGagal($p->kode_perangkat, "HTTP {$respons->status()}");
 

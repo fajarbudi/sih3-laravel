@@ -19,8 +19,11 @@ $jadwal = [
     'pjt' => 10,
     'beacon' => 10,
 ];
+// runInBackground: tiap sumber berjalan sendiri, jadi vendor yang lambat/timeout tidak menunda sumber lain
+// (tanpa ini schedule:run menjalankannya satu per satu). Kunci withoutOverlapping kedaluwarsa setelah 30 menit,
+// agar proses yang mati mendadak tidak menghentikan sumber itu selama 24 jam (bawaan Laravel).
 foreach ($jadwal as $sumber => $menit) {
-    Schedule::command(FetchTelemetri::class, [$sumber])->cron("*/{$menit} * * * *")->withoutOverlapping();
+    Schedule::command(FetchTelemetri::class, [$sumber])->cron("*/{$menit} * * * *")->withoutOverlapping(30)->runInBackground();
 }
 
 // Buletin otomatis BMKG (draf), tiap tengah malam WIB.

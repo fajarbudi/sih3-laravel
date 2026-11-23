@@ -7,6 +7,7 @@ use App\Models\LogTelemetri;
 use App\Models\PerangkatTelemetri;
 use App\Services\RekapTelemetri;
 use Carbon\CarbonInterface;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +72,8 @@ abstract class FetchData
         $waktu = array_column($baris, 'waktu');
         $terbaru = $baris[array_search(max($waktu), $waktu)];
 
-        if (! $perangkat->terakhir_diterima_at || $perangkat->terakhir_diterima_at->toDateTimeString() <= $terbaru['waktu']) {
+        // Dibandingkan sebagai waktu (bukan string) karena format waktu vendor berbeda-beda.
+        if (! $perangkat->terakhir_diterima_at || $perangkat->terakhir_diterima_at->lessThanOrEqualTo(Carbon::parse($terbaru['waktu']))) {
             $perangkat->update([
                 'terakhir_diterima_at' => $terbaru['waktu'],
                 'nilai_terakhir' => $terbaru['hujan'] ?? $terbaru['tma'] ?? null,
@@ -112,6 +114,21 @@ abstract class FetchData
         }
 
         return $hasil;
+    }
+
+    /**
+     * Jalankan satu permintaan ke vendor. Timeout/koneksi putus hanya dicatat sebagai gagal untuk perangkat itu,
+     * agar perangkat lain dalam tarikan yang sama tetap diambil. Mengembalikan null bila gagal terhubung.
+     */
+    protected function coba(?string $kodePerangkat, callable $permintaan): mixed
+    {
+        try {
+            return $permintaan();
+        } catch (ConnectionException $e) {
+            $this->catatGagal($kodePerangkat, $e->getMessage());
+
+            return null;
+        }
     }
 
     protected function catatGagal(?string $kodePerangkat, string $pesan): void

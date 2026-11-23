@@ -46,14 +46,17 @@ class FetchDataTatonas extends FetchData
             );
 
             foreach ($this->potongRentang($mulai, $sampai, 30) as [$a, $b]) {
-                $respons = Http::timeout(90)->get(config('services.tatonas.url').'/history', [
+                $respons = $this->coba($p->kode_perangkat, fn () => Http::timeout(90)->get(config('services.tatonas.url').'/history', [
                     'uc' => config('services.tatonas.uc'),
                     'pc' => config('services.tatonas.pc'),
                     'hw' => $p->kode_perangkat,
                     // start_date eksklusif di API Tatonas; mundur 1 detik agar bacaan tepat di awal rentang ikut.
                     'start_date' => $a->copy()->subSecond()->format('Y-m-d H:i:s'),
                     'end_date' => $b->format('Y-m-d H:i:s'),
-                ]);
+                ]));
+                if (! $respons) {
+                    continue;
+                }
                 if ($respons->json('statusCode') != 200) {
                     $this->catatGagal($p->kode_perangkat, $respons->json('message') ?? "HTTP {$respons->status()}");
 
