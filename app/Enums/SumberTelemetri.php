@@ -8,7 +8,7 @@ enum SumberTelemetri: string
     case Tatonas = 'tatonas';
     case Stesy = 'stesy';
     /** log.pcbjogja.com */
-    case Login = 'login';
+    case PcbJogja = 'pcb-jogja';
     /** Perum Jasa Tirta I */
     case Pjt = 'pjt';
     /** Sensor via hidrologi.bbwsserayuopak.id (ref_pos.pos_tele + pos_sensor) */
@@ -22,7 +22,7 @@ enum SumberTelemetri: string
             self::Higertech => 'Higertech',
             self::Tatonas => 'Tatonas',
             self::Stesy => 'Stesy',
-            self::Login => 'PCB Jogja',
+            self::PcbJogja => 'PCB Jogja',
             self::Pjt => 'Perum Jasa Tirta I',
             self::Beacon => 'Beacon',
             self::Sermo => 'SCADASH Sermo',

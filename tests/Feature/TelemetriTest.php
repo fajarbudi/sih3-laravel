@@ -40,7 +40,7 @@ it('menolak sumber yang tidak dikenal', function () {
 });
 
 it('pcb-jogja: menyimpan nilai terakhir dan tidak menggandakan saat diulang', function () {
-    buatPerangkat(1900, 'awlr', 'login', 'SOWL024');
+    buatPerangkat(1900, 'awlr', 'pcb-jogja', 'SOWL024');
     Http::fake(['*' => Http::response([
         ['id' => 'SOWL024', 'last_online' => '2026-11-19 01:28:01', 'status' => ['water_level' => 0.05]],
         ['id' => 'SOWL099', 'last_online' => '2026-11-19 01:28:01', 'status' => ['water_level' => 1]],
@@ -166,7 +166,7 @@ it('beacon: logger ARR lama dengan parameter Precipitation_Intensity tetap tersi
 
 it('sermo: mendaftarkan perangkat, mengubah UTC ke WIB, membuang nilai error, satu bacaan per 5 menit', function () {
     config(['services.sermo.token' => 'uji', 'services.sermo.walidata_id' => 1]);
-    buatPerangkat(1900, 'awlr', 'login', 'SOWL024'); // Ngrancah sudah ada lewat PCB Jogja
+    buatPerangkat(1900, 'awlr', 'pcb-jogja', 'SOWL024'); // Ngrancah sudah ada lewat PCB Jogja
 
     $titik = fn ($ts, $v, $err = null) => ['timestamp' => $ts, 'value' => $v, 'value_error' => $err];
     Http::fake(function (Request $r) use ($titik) {

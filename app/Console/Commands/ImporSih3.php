@@ -50,8 +50,8 @@ class ImporSih3 extends Command
         ['stesy', '10366', 1903, 1],           // Apistesy.php
         ['stesy', '10367', 1904, 1],
         ['stesy', '10392', 1905, 1],
-        ['login', 'SOWL024', 1900, 1],         // Apilogin.php
-        ['login', 'SOWL025', 1901, 1],
+        ['pcb-jogja', 'SOWL024', 1900, 1],         // Apilogin.php
+        ['pcb-jogja', 'SOWL025', 1901, 1],
     ];
 
     private const WALIDATA_PJT = 11;
@@ -612,7 +612,7 @@ class ImporSih3 extends Command
             'ana_higertech_awlr' => $awlr('higertech'),
             'ana_awlr_tatonas' => $awlr('tatonas'),
             'ana_awlr_stesy' => $awlr('stesy'),
-            'ana_awlr_login' => $awlr('login'),
+            'ana_awlr_login' => $awlr('pcb-jogja'),
             'ana_telemetri_awlr' => $awlr('pjt') + ['campuran' => true],
             'ana_klimatologi_tatonas' => [
                 'tujuan' => 'telemetri_klimatologi', 'sumber' => 'tatonas', 'id' => 'klimatologi_id',

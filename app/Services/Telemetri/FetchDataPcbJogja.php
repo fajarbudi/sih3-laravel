@@ -14,7 +14,7 @@ class FetchDataPcbJogja extends FetchData
 {
     protected function sumber(): SumberTelemetri
     {
-        return SumberTelemetri::Login;
+        return SumberTelemetri::PcbJogja;
     }
 
     public function fetch(?CarbonInterface $dari, ?CarbonInterface $sampai): int
